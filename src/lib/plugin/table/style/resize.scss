@@ -1,0 +1,28 @@
+.ProseMirror {
+  table .column-resize-handle {
+    position: absolute;
+    top: 0;
+    right: -2px;
+    bottom: -2px;
+    width: 4px;
+    pointer-events: none;
+    background-color: var(--primary-light6);
+    opacity: 0;
+
+    .editor & {
+      opacity: 1;
+    }
+  }
+
+  &.resize-cursor {
+    pointer-events: none;
+
+    .editor & {
+      pointer-events: initial;
+      cursor: ew-resize;
+      cursor: col-resize; /* stylelint-disable declaration-block-no-duplicate-properties */
+    }
+  }
+}
+
+

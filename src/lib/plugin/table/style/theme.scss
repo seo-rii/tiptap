@@ -1,0 +1,6 @@
+$highlight-color: #00bcd4;
+
+.ProseMirror {
+  --highlight-color: #{$highlight-color};
+  --highlight-bg-color: #{$highlight-color}33;
+}

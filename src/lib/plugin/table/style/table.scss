@@ -1,0 +1,83 @@
+.ProseMirror {
+  .tableWrapper {
+    position: relative;
+    margin-top: 0.75em;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: all 0.1s ease-in-out;
+  }
+
+  .scrollable {
+    padding-left: 1em;
+    margin-left: -1em;
+    overflow: auto hidden;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+    transition: border 250ms ease-in-out 0s;
+  }
+
+  .scrollable-shadow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -1em;
+    width: 16px;
+    transition: box-shadow 250ms ease-in-out 0s;
+    border-width: 0 0 0 1em;
+    border-style: solid;
+    border-color: transparent;
+    border-image: initial;
+    pointer-events: none;
+
+    &.left {
+      box-shadow: 16px 0 16px -16px inset rgb(0 0 0 / 25%);
+    }
+
+    &.right {
+      right: 0;
+      left: auto;
+      box-shadow: rgb(0 0 0 / 25%) -16px 0 16px -16px inset;
+
+      &.is-editable {
+        &::after {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 1em;
+          height: 1em;
+          background-color: var(--semi-color-nav-bg);
+          content: '';
+        }
+      }
+    }
+  }
+
+  table {
+    margin-top: 1em;
+    border-radius: 4px;
+    border-collapse: collapse;
+    box-sizing: border-box;
+    width: 100% !important;
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    &.is-readonly {
+      margin-top: 0;
+    }
+  }
+}
+
+.editor {
+  .ProseMirror {
+    .tableWrapper {
+      padding: 10px;
+    }
+
+    .selectedCell {
+      border-style: double;
+      background: var(--primary-light3);
+    }
+  }
+}
