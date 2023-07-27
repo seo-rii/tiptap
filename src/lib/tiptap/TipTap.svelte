@@ -23,6 +23,7 @@
 
     $: _san = san(body);
     $: if (_san !== _body && $tiptap) $tiptap?.commands.setContent(_body = _san);
+    $: $tiptap && $tiptap.setEditable(editor);
 
     if (browser) onMount(() => {
         mounted = true;
@@ -32,7 +33,11 @@
                 editable: editor,
                 onTransaction: () => $tiptap = $tiptap,
             });
-            $tiptap.on('update', ({editor: tiptap}: any) => _body = body = editor ? tiptap.getHTML() : body);
+            $tiptap.on('update', ({editor: tiptap}: any) => {
+                let content = tiptap.getHTML(), json = tiptap.getJSON().content;
+                if (Array.isArray(json) && json.length === 1 && !json[0].hasOwnProperty("content")) content = null;
+                _body = body = editor ? content : body
+            });
         })
         return () => {
             mounted = false;
