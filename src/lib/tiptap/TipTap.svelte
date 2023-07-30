@@ -17,7 +17,7 @@
         },
     })
 
-    export let body = '', editor = false, style = '', ref = null, plugins = [];
+    export let body = '', editor = false, style = '', ref = null, options = {};
     const tiptap = setContext('editor', writable<any>(null));
     let element: Element, _body = san(body, true), fullscreen = false, html = false, mounted = false;
 
@@ -33,7 +33,7 @@
             $tiptap = tt(element, _body, {
                 editable: editor,
                 onTransaction: () => $tiptap = $tiptap,
-                plugins,
+                ...options,
             });
             $tiptap.on('update', ({editor: tiptap}: any) => {
                 let content = tiptap.getHTML(), json = tiptap.getJSON().content;
