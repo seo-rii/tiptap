@@ -17,10 +17,11 @@
         },
     })
 
-    export let body = '', editor = false, style = '';
+    export let body = '', editor = false, style = '', ref = null;
     const tiptap = setContext('editor', writable<any>(null));
     let element: Element, _body = san(body, true), fullscreen = false, html = false, mounted = false;
 
+    $: ref = $tiptap;
     $: _san = san(body);
     $: if (_san !== _body && $tiptap) $tiptap?.commands.setContent(_body = _san);
     $: $tiptap && $tiptap.setEditable(editor);

@@ -1,7 +1,7 @@
 import {Editor, mergeAttributes} from "@tiptap/core";
 import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
 import {lowlight} from "lowlight";
-import Image from "@tiptap/extension-image";
+import Image from "$lib/plugin/image";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
@@ -20,20 +20,18 @@ import {Indent} from "$lib/plugin/indent";
 import {Color} from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
 import Iframe from "$lib/plugin/iframe";
+//@ts-ignore
 import Math from "tiptap-katex";
 
-export default (element: Element, content: string, {placeholder = '내용을 입력하세요...', ...props}: any = {}) => new Editor({
+export default (element: Element, content: string, {
+    placeholder = '내용을 입력하세요...',
+    plugins = [],
+    ...props
+}: any = {}) => new Editor({
     element, content, ...props,
     extensions: [
         CodeBlockLowlight.configure({lowlight}),
-        Image.extend({
-            defaultOptions: {...Image.options, sizes: ["inline", "block", "left", "right"]},
-            parseHTML: () => [{tag: 'img'}],
-            renderHTML({HTMLAttributes}) {
-                const {style} = HTMLAttributes;
-                return ["figure", {style}, ["img", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)]];
-            }
-        }).configure({HTMLAttributes: {crossorigin: 'anonymous'}}),
+        Image,
         StarterKit,
         Underline,
         Highlight.configure({multicolor: true}),
@@ -53,5 +51,6 @@ export default (element: Element, content: string, {placeholder = '내용을 입
         TextStyle,
         Math,
         Iframe,
+        ...plugins,
     ],
 });
