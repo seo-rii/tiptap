@@ -19,6 +19,7 @@
                 <ToolbarButton icon="format_italic" prop="italic"/>
                 <ToolbarButton icon="format_strikethrough" prop="strike"/>
                 <ToolbarButton icon="format_underlined" prop="underline"/>
+                <ToolbarButton icon="code" prop="code"/>
             </main>
         {/if}
     </BubbleMenu>
