@@ -1,0 +1,1 @@
+let t=!1;try{window.addEventListener("test",null,Object.defineProperty({},"passive",{get:function(){t=!0}}))}catch{}var e;typeof document<"u"&&"onwheel"in((e=document==null?void 0:document.createElement)==null?void 0:e.call(document,"div"));
