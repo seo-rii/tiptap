@@ -1,14 +1,14 @@
 <script lang="ts">
     import {browser} from "$app/environment";
-    import {onMount, setContext} from 'svelte'
-    import {Card, Input} from "nunui";
+    import {beforeUpdate, onMount, setContext} from 'svelte'
     import {writable} from "svelte/store";
     import sanitizeHtml from 'sanitize-html';
     import "@seorii/prosemirror-math/style.css";
+    import Bubble from "$lib/tiptap/Bubble.svelte";
 
-    const san = (body: string, force = false) => (editor || force) ? body : sanitizeHtml(body, {
+    const san = (body: string) => sanitizeHtml(body, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file']),
-        allowedStyles: '*', allowedAttributes: {
+        allowedStyles: <any>'*', allowedAttributes: {
             '*': ['style', 'class'],
             a: ['href', 'name', 'target'],
             img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading'],
@@ -17,51 +17,61 @@
         },
     })
 
-    export let body = '', editor = false, style = '', ref = null, options = {};
-    const tiptap = setContext('editor', writable<any>(null));
-    let element: Element, _body = san(body, true), fullscreen = false, html = false, mounted = false;
+    export let body = '', editor = false, style = '', ref = null, options = {}
+    const tiptap = setContext('editor', writable<any>(null))
+    let element: Element, fullscreen = false, mounted = false, last = ''
 
-    $: ref = $tiptap;
-    $: _san = san(body);
-    $: if (_san !== _body && $tiptap) $tiptap?.commands.setContent(_body = _san);
-    $: $tiptap && $tiptap.setEditable(editor);
+    $: ref = $tiptap
+    $: $tiptap && $tiptap.setEditable(editor)
 
-    if (browser) onMount(() => {
-        mounted = true;
-        import('./tiptap').then(({default: tt}) => {
-            if (!mounted) return;
-            $tiptap = tt(element, _body, {
-                editable: editor,
-                onTransaction: () => $tiptap = $tiptap,
-                ...options,
-            });
-            $tiptap.on('update', ({editor: tiptap}: any) => {
-                let content = tiptap.getHTML(), json = tiptap.getJSON().content;
-                if (Array.isArray(json) && json.length === 1 && !json[0].hasOwnProperty("content")) content = null;
-                _body = body = editor ? content : body
-            });
+    if (browser) {
+        onMount(() => {
+            body = last = san(body)
+            mounted = true
+            import('./tiptap').then(({default: tt}) => {
+                if (!mounted) return;
+                $tiptap = tt(element, body, {
+                    editable: editor,
+                    onTransaction: () => $tiptap = $tiptap,
+                    ...options,
+                });
+                $tiptap.on('update', ({editor: tiptap}: any) => {
+                    let content = tiptap.getHTML(), json = tiptap.getJSON().content
+                    if (Array.isArray(json) && json.length === 1 && !json[0].hasOwnProperty("content")) content = null
+                    body = last = content
+                });
+            })
+
+            return () => {
+                mounted = false
+                $tiptap?.destroy?.()
+            }
+        });
+
+        beforeUpdate(() => {
+            if (last === body) return
+            body = san(body)
+            $tiptap?.commands?.setContent?.(body)
         })
-        return () => {
-            mounted = false;
-            $tiptap?.destroy?.();
-        }
-    });
+    }
 </script>
 
-<Card outlined={editor}
-      style="max-width:100%;margin-top:0;{editor ? '' : 'box-shadow:none;padding:0;border-radius:0;'}{style}">
-    <main class:fullscreen class:editor>
-        <div class="wrapper">
-            <div bind:this={element} class:hide={html} class="target"></div>
-            {#if !$tiptap}
-                로드 중...
-            {/if}
-            <div class:hide={!html}>
-                <Input multiline fullWidth placeholder="HTML" bind:value={body}/>
-            </div>
-        </div>
-    </main>
-</Card>
+<main class:fullscreen class:editor>
+    <div class="wrapper">
+        <div bind:this={element} class="target"></div>
+        {#if !$tiptap}
+            로드 중...
+        {/if}
+    </div>
+</main>
+
+{#if $$slots.bubble}
+    <Bubble>
+        <slot name="bubble"/>
+    </Bubble>
+{:else}
+    <Bubble/>
+{/if}
 
 <style lang="scss">
   main {
@@ -69,22 +79,18 @@
     overscroll-behavior: none;
 
     &.fullscreen {
-      z-index: 9999999;
+      z-index: 999999999;
       position: fixed;
       top: 0;
       left: 0;
+      right: 0;
+      bottom: 0;
       background: var(--surface);
       padding: 82px 12px 12px 12px;
-      width: calc(100% - 24px);
-      height: calc(100% - 94px);
     }
 
     .wrapper {
       position: relative;
-
-      .hide {
-        display: none;
-      }
     }
   }
 

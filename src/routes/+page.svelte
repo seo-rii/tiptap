@@ -10,5 +10,5 @@
     <br>
     <Checkbox bind:checked={editor} label="editor"/>
     <br>
-    <Input placeholder="html" multiline readonly bind:value={body}/>
+    <Input placeholder="html" multiline bind:value={body}/>
 </ThemeProvider>
