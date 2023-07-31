@@ -3,11 +3,11 @@
     import {onMount, setContext} from 'svelte'
     import {Card, Input} from "nunui";
     import {writable} from "svelte/store";
-    import "tiptap-katex/style.css";
     import sanitizeHtml from 'sanitize-html';
+    import "@seorii/prosemirror-math/style.css";
 
     const san = (body: string, force = false) => (editor || force) ? body : sanitizeHtml(body, {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'iframe', 'tiptap-file']),
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file']),
         allowedStyles: '*', allowedAttributes: {
             '*': ['style', 'class'],
             a: ['href', 'name', 'target'],
@@ -124,6 +124,12 @@
         max-width: 100%;
         border-radius: 12px;
         position: relative;
+      }
+
+      code.inline {
+        background: var(--primary-light1);
+        padding: 2px 4px;
+        border-radius: 4px;
       }
 
       pre {

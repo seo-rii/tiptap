@@ -1,6 +1,7 @@
 import {Editor, mergeAttributes} from "@tiptap/core";
 import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
 import {lowlight} from "lowlight";
+import Code from "@tiptap/extension-code";
 import Image from "$lib/plugin/image";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -20,8 +21,8 @@ import {Indent} from "$lib/plugin/indent";
 import {Color} from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
 import Iframe from "$lib/plugin/iframe";
-//@ts-ignore
-import Math from "tiptap-katex";
+// @ts-ignore
+import {Katex} from "@seorii/prosemirror-math/tiptap";
 
 export default (element: Element, content: string, {
     placeholder = '내용을 입력하세요...',
@@ -49,8 +50,13 @@ export default (element: Element, content: string, {
         Indent,
         Color,
         TextStyle,
-        Math,
+        Katex,
         Iframe,
+        Code.extend({
+            renderHTML({HTMLAttributes}) {
+                return ['code', mergeAttributes(HTMLAttributes, {class: 'inline'})]
+            }
+        }),
         ...plugins,
     ],
 });
