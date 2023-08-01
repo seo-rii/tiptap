@@ -15,6 +15,8 @@
             a: ['href', 'name', 'target'],
             img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading'],
             iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
+            th: ['colwidth', 'colspan', 'rowspan'],
+            td: ['colwidth', 'colspan', 'rowspan'],
             'tiptap-file': ['id']
         },
     })

@@ -76,6 +76,9 @@ dependencies:
   nunui:
     specifier: ^0.0.99
     version: 0.0.99(@lezer/common@1.0.3)(svelte@4.1.2)
+  prosemirror-commands:
+    specifier: ^1.5.2
+    version: 1.5.2
   prosemirror-model:
     specifier: ^1.19.3
     version: 1.19.3

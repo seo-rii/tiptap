@@ -42,6 +42,8 @@ export default (element: Element, content: string, {
         TextAlign.configure({types: ['heading', 'paragraph', 'image']}),
         DropCursor,
         orderedlist,
+        MathInline,
+        MathBlock,
         table,
         tableHeader,
         tableRow,
@@ -52,8 +54,6 @@ export default (element: Element, content: string, {
         Indent,
         Color,
         TextStyle,
-        MathInline,
-        MathBlock,
         Iframe,
         Code.extend({
             renderHTML({HTMLAttributes}) {

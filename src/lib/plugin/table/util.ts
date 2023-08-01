@@ -1,8 +1,7 @@
 import {findParentNode} from '@tiptap/core';
 import type {Node, ResolvedPos} from 'prosemirror-model';
-import type {Selection, Transaction} from 'prosemirror-state';
+import type {EditorState, Selection, Transaction} from 'prosemirror-state';
 import {CellSelection, selectionCell, TableMap, type  TableRect} from 'prosemirror-tables';
-import type {EditorState} from "prosemirror-state";
 
 export const isRectSelected = (rect: any) => (selection: CellSelection) => {
     const map = TableMap.get(selection.$anchorCell.node(-1));
@@ -27,6 +26,17 @@ export const findTable = (selection: Selection) =>
 export const isCellSelection = (selection: any) => {
     return selection instanceof CellSelection;
 };
+
+export const isTableAnySelected = (selection: any) => {
+    if (isCellSelection(selection)) {
+        const map = TableMap.get(selection.$anchorCell.node(-1));
+        const start = selection.$anchorCell.start(-1);
+        return map.cellsInRect(
+            map.rectBetween(selection.$anchorCell.pos - start, selection.$headCell.pos - start)
+        );
+    }
+    return false;
+}
 
 export const isColumnSelected = (columnIndex: number) => (selection: any) => {
     if (isCellSelection(selection)) {
@@ -92,7 +102,11 @@ export const getCellsInColumn = (columnIndex: number | number[]) => (selection: 
                 );
             }
             return acc;
-        }, [] as { pos: number; start: number; node: Node | null | undefined }[]);
+        }, [] as {
+            pos: number;
+            start: number;
+            node: Node | null | undefined
+        }[]);
     }
 };
 
@@ -118,7 +132,11 @@ export const getCellsInRow = (rowIndex: number | number[]) => (selection: Select
                 );
             }
             return acc;
-        }, [] as { pos: number; start: number; node: Node | null | undefined }[]);
+        }, [] as {
+            pos: number;
+            start: number;
+            node: Node | null | undefined
+        }[]);
     }
 };
 

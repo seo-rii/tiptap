@@ -1,4 +1,4 @@
-import {isColumnSelected, isTableSelected} from "./util";
+import {isColumnSelected, isRowSelected, isTableSelected} from "./util";
 import type {KeyboardShortcutCommand} from "@tiptap/core";
 import {TableMap} from "prosemirror-tables";
 
@@ -14,7 +14,7 @@ export const deleteTable: KeyboardShortcutCommand = ({editor}) => {
         }
     }
     for (let i = height - 1; i >= 0; i--) {
-        if (isColumnSelected(i)(selection)) {
+        if (isRowSelected(i)(selection)) {
             editor.commands.deleteRow();
             return true;
         }

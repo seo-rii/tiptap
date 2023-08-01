@@ -67,6 +67,14 @@ export default {
                             const {to} = range;
                             editor.chain().focus().deleteRange(range).setNode('math_display').focus().run();
                         }
+                    },
+                    {
+                        icon: 'table_chart',
+                        title: '테이블',
+                        subtitle: '표',
+                        command: ({editor, range}) => {
+                            editor.chain().focus().insertTable({rows: 2, cols: 3}).run();
+                        }
                     }
                 ]
             }
