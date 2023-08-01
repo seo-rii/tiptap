@@ -1,0 +1,1 @@
+let t=!1;try{window.addEventListener("test",null,Object.defineProperty({},"passive",{get:function(){t=!0}}))}catch{}const _=t?{passive:!1}:!1;var e;const l=typeof document<"u"&&"onwheel"in((e=document==null?void 0:document.createElement)==null?void 0:e.call(document,"div"))?"wheel":"mousewheel";export{_ as a,l as w};
