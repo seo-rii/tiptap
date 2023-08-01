@@ -4,7 +4,6 @@
     import {slashVisible, slashItems, slashLocaltion, slashProps} from '../plugin/command/stores';
     import {fly, slide} from "svelte/transition";
     import {quartOut} from "svelte/easing";
-    import {flip} from 'svelte/animate';
 
     const tiptap = getContext<any>('editor');
     export let selectedIndex = 0;

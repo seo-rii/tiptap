@@ -54,15 +54,15 @@ export default {
                     {
                         icon: 'code',
                         title: '코드 블록',
-                        subtitle: '코드 블록',
+                        subtitle: '하이라이팅되는 코드 블록',
                         command: ({editor, range}) => {
                             editor.chain().focus().deleteRange(range).setNode('codeBlock').run();
                         }
                     },
                     {
                         icon: 'functions',
-                        title: '수식',
-                        subtitle: '수식',
+                        title: '수식 블록',
+                        subtitle: '가운데로 정렬된 큰 수식',
                         command: ({editor, range}) => {
                             const {to} = range;
                             editor.chain().focus().deleteRange(range).setNode('math_display').focus().run();

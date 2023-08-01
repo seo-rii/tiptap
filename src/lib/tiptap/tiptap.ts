@@ -16,7 +16,6 @@ import tableRow from "$lib/plugin/table/tableRow";
 import tableCell from "$lib/plugin/table/tableCell";
 import Superscript from '@tiptap/extension-superscript'
 import Subscript from "@tiptap/extension-subscript"
-import Placeholder from "@tiptap/extension-placeholder";
 import {Indent} from "$lib/plugin/indent";
 import {Color} from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
@@ -27,7 +26,6 @@ import {MathInline, MathBlock} from "@seorii/prosemirror-math/tiptap";
 import command from "$lib/plugin/command";
 
 export default (element: Element, content: string, {
-    placeholder = '내용을 입력하세요...',
     plugins = [],
     ...props
 }: any = {}) => new Editor({
@@ -50,7 +48,6 @@ export default (element: Element, content: string, {
         tableCell,
         Superscript,
         Subscript,
-        Placeholder.configure({placeholder}),
         Indent,
         Color,
         TextStyle,

@@ -23,7 +23,7 @@
 {#if icon}
     <IconButton size="1.2em" {icon} active={isActive()} on:click={toggle} tooltip={tooltip} tabindex="0"/>
 {:else}
-    <Button outlined={!isActive()} on:click={handler || toggle} small>
+    <Button outlined={!isActive()} on:click={handler || toggle} small {...$$restProps}>
         {label}
         <slot/>
     </Button>

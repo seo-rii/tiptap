@@ -5,6 +5,7 @@
     import sanitizeHtml from 'sanitize-html';
     import "@seorii/prosemirror-math/style.css";
     import Bubble from "$lib/tiptap/Bubble.svelte";
+    import Floating from "$lib/tiptap/Floating.svelte";
     import Command from "$lib/tiptap/Command.svelte";
     import {slashItems, slashProps, slashVisible} from "$lib/plugin/command/stores";
 
@@ -103,6 +104,7 @@
     </div>
     {#if editor}
         <Command {selectedIndex}/>
+        <Floating/>
         {#if $$slots.bubble}
             <Bubble>
                 <slot name="bubble"/>
