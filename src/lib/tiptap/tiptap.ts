@@ -22,7 +22,9 @@ import {Color} from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
 import Iframe from "$lib/plugin/iframe";
 // @ts-ignore
-import {Katex} from "@seorii/prosemirror-math/tiptap";
+import {MathInline, MathBlock} from "@seorii/prosemirror-math/tiptap";
+
+import command from "$lib/plugin/command";
 
 export default (element: Element, content: string, {
     placeholder = '내용을 입력하세요...',
@@ -50,13 +52,15 @@ export default (element: Element, content: string, {
         Indent,
         Color,
         TextStyle,
-        Katex,
+        MathInline,
+        MathBlock,
         Iframe,
         Code.extend({
             renderHTML({HTMLAttributes}) {
                 return ['code', mergeAttributes(HTMLAttributes, {class: 'inline'})]
             }
         }),
+        command,
         ...plugins,
     ],
 });

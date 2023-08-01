@@ -5,6 +5,8 @@
     import sanitizeHtml from 'sanitize-html';
     import "@seorii/prosemirror-math/style.css";
     import Bubble from "$lib/tiptap/Bubble.svelte";
+    import Command from "$lib/tiptap/Command.svelte";
+    import {slashItems, slashProps, slashVisible} from "$lib/plugin/command/stores";
 
     const san = (body: string) => sanitizeHtml(body, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file']),
@@ -54,29 +56,72 @@
             $tiptap?.commands?.setContent?.(body)
         })
     }
+
+    let selectedIndex = 0;
+    $: selectedIndex = $slashVisible ? selectedIndex : 0;
+
+    function handleKeydown(event) {
+        if (!$slashVisible) return;
+        if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            selectedIndex = (selectedIndex + $slashItems.length - 1) % $slashItems.length;
+            return true;
+        }
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            selectedIndex = (selectedIndex + 1) % $slashItems.length;
+            return true;
+        }
+
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            selectItem(selectedIndex);
+            return true;
+        }
+
+        return false;
+    }
+
+    function selectItem(index) {
+        const item = $slashItems[index];
+
+        if (item) {
+            let range = $slashProps.range;
+            item.command({editor, range});
+        }
+    }
 </script>
 
 <main class:fullscreen class:editor>
     <div class="wrapper">
-        <div bind:this={element} class="target"></div>
+        <div bind:this={element} class="target" on:keydown|capture={handleKeydown}></div>
         {#if !$tiptap}
             로드 중...
         {/if}
     </div>
+    {#if editor}
+        <Command {selectedIndex}/>
+        {#if $$slots.bubble}
+            <Bubble>
+                <slot name="bubble"/>
+            </Bubble>
+        {:else}
+            <Bubble/>
+        {/if}
+    {/if}
 </main>
 
-{#if $$slots.bubble}
-    <Bubble>
-        <slot name="bubble"/>
-    </Bubble>
-{:else}
-    <Bubble/>
-{/if}
 
 <style lang="scss">
   main {
     position: relative;
     overscroll-behavior: none;
+    --shadow: 0 1px 2px rgba(127, 127, 127, 0.07),
+    0 2px 4px rgba(127, 127, 127, 0.07),
+    0 4px 8px rgba(127, 127, 127, 0.07),
+    0 8px 16px rgba(127, 127, 127, 0.07),
+    0 16px 32px rgba(127, 127, 127, 0.07),
+    0 32px 64px rgba(127, 127, 127, 0.07);
 
     &.fullscreen {
       z-index: 999999999;

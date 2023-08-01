@@ -36,7 +36,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@seorii/prosemirror-math": "^0.3.7",
+    "@seorii/prosemirror-math": "^0.4.0",
     "@tiptap/core": "^2.0.4",
     "@tiptap/extension-code": "^2.0.4",
     "@tiptap/extension-code-block-lowlight": "^2.0.4",
@@ -58,6 +58,7 @@
     "@tiptap/extension-underline": "^2.0.4",
     "@tiptap/pm": "^2.0.4",
     "@tiptap/starter-kit": "^2.0.4",
+    "@tiptap/suggestion": "^2.0.4",
     "lowlight": "^2.9.0",
     "nunui": "^0.0.99",
     "prosemirror-model": "^1.19.3",
