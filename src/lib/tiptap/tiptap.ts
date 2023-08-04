@@ -32,7 +32,19 @@ export default (element: Element, content: string, {
 }: any = {}) => new Editor({
     element, content, ...props,
     extensions: [
-        CodeBlockLowlight.configure({lowlight}),
+        CodeBlockLowlight.extend({
+            addKeyboardShortcuts() {
+                return {
+                    ...this.parent?.(),
+                    'Tab': () => {
+                        if (this.editor.isActive('codeBlock')) {
+                            return this.editor.commands.insertContent('    ');
+                        }
+                        return true;
+                    }
+                }
+            }
+        }).configure({lowlight}),
         Image,
         Youtube,
         StarterKit,
@@ -67,4 +79,5 @@ export default (element: Element, content: string, {
         command,
         ...plugins,
     ],
-});
+})
+;

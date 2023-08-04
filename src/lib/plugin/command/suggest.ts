@@ -78,6 +78,14 @@ export default {
                         }
                     },
                     {
+                        icon: 'format_quote',
+                        title: i18n('blockquote'),
+                        subtitle: i18n('blockquoteInfo'),
+                        command: ({editor, range}) => {
+                            editor.chain().focus().deleteRange(range).setBlockquote().focus().run();
+                        }
+                    },
+                    {
                         icon: 'iframe',
                         title: i18n('iframe'),
                         subtitle: i18n('iframeInfo'),

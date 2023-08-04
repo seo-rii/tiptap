@@ -1,5 +1,5 @@
 export default {
-    target: ['kod'],
+    target: ['ko'],
     lang: 'ko',
     country: 'KR',
 
@@ -27,6 +27,7 @@ export default {
     image: '이미지',
     iframe: 'iframe',
     youtube: '유튜브',
+    blockquote: '인용구',
 
     title1Info: '큰 제목',
     title2Info: '좀 더 작은 제목',
@@ -35,10 +36,11 @@ export default {
     numberListInfo: '1, 2, 3, 4',
     codeBlockInfo: '하이라이팅되는 코드 블록',
     mathBlockInfo: '가운데로 정렬되는 수식 블록',
-    tableInfo: '표',
+    tableInfo: '표 삽입',
     imageInfo: '이미지',
     iframeInfo: '다른 웹사이트 삽입',
     youtubeInfo: '유튜브 동영상 삽입',
+    blockquoteInfo: '있어보이는 인용구 삽입',
 
     newLineInfo: '/로 명령어 입력. 또는'
 }

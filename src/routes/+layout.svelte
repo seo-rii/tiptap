@@ -8,7 +8,6 @@
 
 <style lang="scss">
   :global {
-
     @font-face {
       font-family: 'Spoqa Han Sans Neo';
       font-weight: 700;
@@ -64,6 +63,7 @@
 
     body > div > main {
       padding: 12px;
+      height: calc(100% - 24px);
     }
 
     h1, h2 {
@@ -71,8 +71,8 @@
     }
 
     hr {
-        border: 0;
-        border-top: 1px solid #eee;
+      border: 0;
+      border-top: 1px solid #eee;
     }
   }
 </style>

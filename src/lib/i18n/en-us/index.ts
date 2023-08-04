@@ -27,6 +27,7 @@ export default {
     image: 'Image',
     iframe: 'iframe',
     youtube: 'Youtube',
+    blockquote: 'Blockquote',
 
     title1Info: 'Big title',
     title2Info: 'Smaller title',
@@ -39,6 +40,8 @@ export default {
     imageInfo: 'Image',
     iframeInfo: 'Embed another website',
     youtubeInfo: 'Embed Youtube video',
+    blockquoteInfo: 'Blockquote',
+
 
     newLineInfo: 'Press / to enter commands. Or'
 }

@@ -11,7 +11,7 @@
     import i18n from "$lib/i18n";
 
     const san = (body: string) => sanitizeHtml(body, {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file', 'lite-youtube']),
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file', 'lite-youtube', 'blockquote']),
         allowedStyles: <any>'*', allowedAttributes: {
             '*': ['style', 'class'],
             a: ['href', 'name', 'target'],
@@ -24,12 +24,12 @@
         },
     })
 
-    export let body = '', editor = false, style = '', ref = null, options = {}
+    export let body = '', editable = false, style = '', ref = null, options = {}
     const tiptap = setContext('editor', writable<any>(null))
     let element: Element, fullscreen = false, mounted = false, last = ''
 
     $: ref = $tiptap
-    $: $tiptap && $tiptap.setEditable(editor)
+    $: $tiptap && $tiptap.setEditable(editable)
 
     if (browser) {
         onMount(() => {
@@ -38,7 +38,7 @@
             Promise.all([import('./tiptap'), import("@justinribeiro/lite-youtube")]).then(([{default: tt}]) => {
                 if (!mounted) return;
                 $tiptap = tt(element, body, {
-                    editable: editor,
+                    editable: editable,
                     onTransaction: () => $tiptap = $tiptap,
                     ...options,
                 });
@@ -92,19 +92,19 @@
 
         if (item) {
             let range = $slashProps.range;
-            item.command({editor, range});
+            item.command({editor: editable, range});
         }
     }
 </script>
 
-<main class:fullscreen class:editor>
+<main class:fullscreen class:editable>
     <div class="wrapper">
         <div bind:this={element} class="target" on:keydown|capture={handleKeydown}></div>
         {#if !$tiptap}
             {i18n('loading')}
         {/if}
     </div>
-    {#if editor}
+    {#if editable}
         <Command {selectedIndex}/>
         <Floating/>
         {#if $$slots.bubble}
@@ -155,12 +155,12 @@
     }
   }
 
-  .editor :global(.ProseMirror-selectednode img) {
+  .editable :global(.ProseMirror-selectednode img) {
     transition: all 0.2s ease-in-out;
     filter: drop-shadow(0 0 0.75rem var(--primary-light13));
   }
 
-  .editor :global(.iframe-wrapper.ProseMirror-selectednode) {
+  .editable :global(.iframe-wrapper.ProseMirror-selectednode) {
     outline: 3px solid var(--primary);
   }
 
