@@ -1,6 +1,6 @@
 <script lang="ts">
     import {Button, IconButton, Input, List, TwoLine} from "nunui";
-    import {getContext, tick} from "svelte";
+    import {getContext} from "svelte";
     import {slashVisible, slashItems, slashLocaltion, slashProps, slashDetail} from '../plugin/command/stores';
     import {fly, slide} from "svelte/transition";
     import {quartOut} from "svelte/easing";
@@ -39,6 +39,25 @@
                     </Button>
                     <Button tabindex="0" transparent small
                             on:click={() => $tiptap.commands.insertContent({type: 'iframe', attrs: {src: iframe}})}>삽입
+                    </Button>
+                </footer>
+            </div>
+        {:else if $slashDetail === 'youtube'}
+            <div class="detail">
+                <header>
+                    <IconButton icon="arrow_back" on:click={() => $slashDetail = ''}/>
+                    <div class="title">youtube</div>
+                </header>
+                <Input placeholder="url" fullWidth bind:value={iframe} autofocus
+                       on:submit={() => $tiptap.commands.insertVideoPlayer({url: iframe})}/>
+                <footer>
+                    <Button tabindex="0" transparent small on:click={() => {
+                                iframe = ''
+                                $slashDetail = ''
+                            }}>취소
+                    </Button>
+                    <Button tabindex="0" transparent small
+                            on:click={() => $tiptap.commands.insertVideoPlayer({url: iframe})}>삽입
                     </Button>
                 </footer>
             </div>

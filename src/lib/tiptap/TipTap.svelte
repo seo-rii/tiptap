@@ -10,7 +10,7 @@
     import {slashItems, slashProps, slashVisible} from "$lib/plugin/command/stores";
 
     const san = (body: string) => sanitizeHtml(body, {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file']),
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file', 'lite-youtube']),
         allowedStyles: <any>'*', allowedAttributes: {
             '*': ['style', 'class'],
             a: ['href', 'name', 'target'],
@@ -18,7 +18,8 @@
             iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
             th: ['colwidth', 'colspan', 'rowspan'],
             td: ['colwidth', 'colspan', 'rowspan'],
-            'tiptap-file': ['id']
+            'tiptap-file': ['id'],
+            'lite-youtube': ['videoid', 'params', 'nocookie', 'title', 'provider'],
         },
     })
 
@@ -33,7 +34,7 @@
         onMount(() => {
             body = last = san(body)
             mounted = true
-            import('./tiptap').then(({default: tt}) => {
+            Promise.all([import('./tiptap'), import("@justinribeiro/lite-youtube")]).then(([{default: tt}]) => {
                 if (!mounted) return;
                 $tiptap = tt(element, body, {
                     editable: editor,
@@ -158,7 +159,7 @@
     filter: drop-shadow(0 0 0.75rem var(--primary-light13));
   }
 
-  .editor .iframe-wrapper.ProseMirror-selectednode {
+  .editor :global(.iframe-wrapper.ProseMirror-selectednode) {
     outline: 3px solid var(--primary);
   }
 

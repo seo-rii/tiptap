@@ -22,6 +22,7 @@ import TextStyle from '@tiptap/extension-text-style';
 import Iframe from "$lib/plugin/iframe";
 // @ts-ignore
 import {MathInline, MathBlock} from "@seorii/prosemirror-math/tiptap";
+import Youtube from "$lib/plugin/youtube";
 
 import command from "$lib/plugin/command";
 
@@ -33,6 +34,7 @@ export default (element: Element, content: string, {
     extensions: [
         CodeBlockLowlight.configure({lowlight}),
         Image,
+        Youtube,
         StarterKit,
         Underline,
         Highlight.configure({multicolor: true}),

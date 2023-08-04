@@ -83,6 +83,14 @@ export default {
                         command: ({editor, range}) => {
                             slashDetail.set('iframe');
                         }
+                    },
+                    {
+                        icon: 'youtube_activity',
+                        title: '유튜브',
+                        subtitle: '유튜브 임베드',
+                        command: ({editor, range}) => {
+                            slashDetail.set('youtube');
+                        }
                     }
                 ]
             }
