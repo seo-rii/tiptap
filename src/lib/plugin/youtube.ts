@@ -42,44 +42,15 @@ export default Node.create<VideoPlayerOptions>({
     parseHTML() {
         return [
             {
-                tag: "figure",
-                getAttrs: (el: HTMLElement) => {
-                    const videoEl = el.querySelector("lite-youtube");
-                    if (!videoEl) return false;
-                    const videoid = videoEl.getAttribute("videoid");
-                    if (!videoid) return false;
-                    return {
-                        videoid,
-                        provider: "youtube",
-                    };
-                },
-            },
-            {
                 tag: "lite-youtube",
             },
         ];
     },
     renderHTML({HTMLAttributes}) {
         return [
-            "figure",
-            {class: "doc-video-player"},
-            [
-                "lite-youtube",
-                mergeAttributes(videoPlayerStaticAttributes, this.options.HTMLAttributes, HTMLAttributes),
-            ],
-            [
-                "figcaption",
-                [
-                    "a",
-                    {
-                        href: `https://youtu.be/${HTMLAttributes.videoid}`,
-                        target: "_blank",
-                        rel: "noreferrer noopener nofollow",
-                    },
-                    "Watch on YouTube",
-                ],
-            ],
-        ];
+            "lite-youtube",
+            mergeAttributes(videoPlayerStaticAttributes, this.options.HTMLAttributes, HTMLAttributes),
+        ]
     },
     addCommands() {
         return {
