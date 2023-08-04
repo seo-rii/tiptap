@@ -4,6 +4,7 @@
     import {slashVisible, slashItems, slashLocaltion, slashProps, slashDetail} from '../plugin/command/stores';
     import {fly, slide} from "svelte/transition";
     import {quartOut} from "svelte/easing";
+    import i18n from "$lib/i18n";
 
     const tiptap = getContext<any>('editor');
     export let selectedIndex = 0;
@@ -35,10 +36,10 @@
                     <Button tabindex="0" transparent small on:click={() => {
                                 iframe = ''
                                 $slashDetail = ''
-                            }}>취소
+                            }}>{i18n('cancel')}
                     </Button>
                     <Button tabindex="0" transparent small
-                            on:click={() => $tiptap.commands.insertContent({type: 'iframe', attrs: {src: iframe}})}>삽입
+                            on:click={() => $tiptap.commands.insertContent({type: 'iframe', attrs: {src: iframe}})}>{i18n('insert')}
                     </Button>
                 </footer>
             </div>
@@ -46,7 +47,7 @@
             <div class="detail">
                 <header>
                     <IconButton icon="arrow_back" on:click={() => $slashDetail = ''}/>
-                    <div class="title">youtube</div>
+                    <div class="title">Youtube</div>
                 </header>
                 <Input placeholder="url" fullWidth bind:value={iframe} autofocus
                        on:submit={() => $tiptap.commands.insertVideoPlayer({url: iframe})}/>
@@ -54,10 +55,10 @@
                     <Button tabindex="0" transparent small on:click={() => {
                                 iframe = ''
                                 $slashDetail = ''
-                            }}>취소
+                            }}>{i18n('cancel')}
                     </Button>
                     <Button tabindex="0" transparent small
-                            on:click={() => $tiptap.commands.insertVideoPlayer({url: iframe})}>삽입
+                            on:click={() => $tiptap.commands.insertVideoPlayer({url: iframe})}>{i18n('insert')}
                     </Button>
                 </footer>
             </div>
@@ -78,7 +79,8 @@
                         </div>
                     {/each}
                     {#if !$slashItems.length}
-                        <div class="section" transition:slide={{duration: 400, easing: quartOut}}>결과 없음</div>
+                        <div class="section"
+                             transition:slide={{duration: 400, easing: quartOut}}>{i18n('noResult')}</div>
                     {/if}
                 </List>
             </div>

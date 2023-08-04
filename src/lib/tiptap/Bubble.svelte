@@ -7,6 +7,7 @@
     import deleteTable from "$lib/plugin/table/deleteTable";
     import setMath from "$lib/tiptap/setMath";
     import {Button, Icon, IconButton, Input, List, OneLine, Tooltip} from "nunui";
+    import i18n from "$lib/i18n";
 
     const tiptap = getContext<any>('editor')
 
@@ -38,7 +39,7 @@
                     <div class="link">
                         <p>
                             <Icon icon="link"/>
-                            링크
+                            {i18n('link')}
                         </p>
                         <Input placeholder="url" fullWidth bind:value={href} autofocus/>
                         <div>
@@ -46,9 +47,10 @@
                                 href = ''
                                 $tiptap.chain().focus().unsetLink().run()
                                 tick().then(() => link = false)
-                            }}>삭제
+                            }}>{i18n('delete')}
                             </Button>
-                            <Button tabindex="0" transparent small on:click={() => link = false}>닫기</Button>
+                            <Button tabindex="0" transparent small
+                                    on:click={() => link = false}>{i18n('close')}</Button>
                         </div>
                     </div>
                 {:else if table}
@@ -71,16 +73,16 @@
                         <IconButton size="1.2em" icon="format_align_left" slot="target"/>
                         <div style="margin: -6px;font-size: 0.6em">
                             <List>
-                                <OneLine icon="format_align_left" title="왼쪽 정렬"
+                                <OneLine icon="format_align_left" title={i18n('alignLeft')}
                                          on:click={() => $tiptap.chain().focus().setTextAlign('left').run()}
                                          active={$tiptap.isActive({ textAlign: 'left' })}/>
-                                <OneLine icon="format_align_center" title="가운데 정렬"
+                                <OneLine icon="format_align_center" title={i18n('alignCenter')}
                                          on:click={() => $tiptap.chain().focus().setTextAlign('center').run()}
                                          active={$tiptap.isActive({ textAlign: 'center' })}/>
-                                <OneLine icon="format_align_right" title="오른쪽 정렬"
+                                <OneLine icon="format_align_right" title={i18n('alignRight')}
                                          on:click={() => $tiptap.chain().focus().setTextAlign('right').run()}
                                          active={$tiptap.isActive({ textAlign: 'right' })}/>
-                                <OneLine icon="format_align_justify" title="양쪽 정렬"
+                                <OneLine icon="format_align_justify" title={i18n('alignJustify')}
                                          on:click={() => $tiptap.chain().focus().setTextAlign('justify').run()}
                                          active={$tiptap.isActive({ textAlign: 'justify' })}/>
                             </List>

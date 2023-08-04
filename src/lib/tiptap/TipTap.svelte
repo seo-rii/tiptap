@@ -8,6 +8,7 @@
     import Floating from "$lib/tiptap/Floating.svelte";
     import Command from "$lib/tiptap/Command.svelte";
     import {slashItems, slashProps, slashVisible} from "$lib/plugin/command/stores";
+    import i18n from "$lib/i18n";
 
     const san = (body: string) => sanitizeHtml(body, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file', 'lite-youtube']),
@@ -100,7 +101,7 @@
     <div class="wrapper">
         <div bind:this={element} class="target" on:keydown|capture={handleKeydown}></div>
         {#if !$tiptap}
-            로드 중...
+            {i18n('loading')}
         {/if}
     </div>
     {#if editor}
@@ -173,6 +174,10 @@
         float: left;
         height: 0;
         pointer-events: none;
+      }
+
+      a {
+        cursor: pointer;
       }
 
       img {

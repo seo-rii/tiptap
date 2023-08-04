@@ -1,38 +1,39 @@
 import {slashVisible, slashItems, slashLocaltion, slashProps, slashDetail} from './stores';
+import i18n from "$lib/i18n";
 
 export default {
     items: ({query}) => {
         const raw = [
             {
-                section: '텍스트', list: [
+                section: i18n('text'), list: [
                     {
                         icon: 'title',
-                        title: '제목 1',
-                        subtitle: '큰 제목',
+                        title: i18n('title') + ' 1',
+                        subtitle: i18n('title1Info'),
                         command: ({editor, range}) => {
                             editor.chain().focus().deleteRange(range).setNode('heading', {level: 1}).run();
                         }
                     },
                     {
                         icon: 'title',
-                        title: '제목 2',
-                        subtitle: '좀 더 작은 제목',
+                        title: i18n('title') + ' 2',
+                        subtitle: i18n('title2Info'),
                         command: ({editor, range}) => {
                             editor.chain().focus().deleteRange(range).setNode('heading', {level: 2}).run();
                         }
                     },
                     {
                         icon: 'title',
-                        title: '제목 3',
-                        subtitle: '적당히 큰 제목',
+                        title: i18n('title') + ' 3',
+                        subtitle: i18n('title3Info'),
                         command: ({editor, range}) => {
                             editor.chain().focus().deleteRange(range).setNode('heading', {level: 3}).run();
                         }
                     },
                     {
                         icon: 'format_list_bulleted',
-                        title: '리스트',
-                        subtitle: '순서 없는 리스트',
+                        title: i18n('unorderedList'),
+                        subtitle: i18n('unorderedListInfo'),
                         command: ({editor, range}) => {
                             editor.commands.deleteRange(range);
                             editor.commands.toggleBulletList();
@@ -40,8 +41,8 @@ export default {
                     },
                     {
                         icon: 'format_list_numbered',
-                        title: '숫자 리스트',
-                        subtitle: '1, 2, 3, 4',
+                        title: i18n('numberList'),
+                        subtitle: i18n('numberListInfo'),
                         command: ({editor, range}) => {
                             editor.commands.deleteRange(range);
                             editor.commands.toggleOrderedList();
@@ -50,19 +51,19 @@ export default {
                 ]
             },
             {
-                section: '블록', list: [
+                section: i18n('block'), list: [
                     {
                         icon: 'code',
-                        title: '코드 블록',
-                        subtitle: '하이라이팅되는 코드 블록',
+                        title: i18n('codeBlock'),
+                        subtitle: i18n('codeBlockInfo'),
                         command: ({editor, range}) => {
                             editor.chain().focus().deleteRange(range).setNode('codeBlock').run();
                         }
                     },
                     {
                         icon: 'functions',
-                        title: '수식 블록',
-                        subtitle: '가운데로 정렬된 큰 수식',
+                        title: i18n('mathBlock'),
+                        subtitle: i18n('mathBlockInfo'),
                         command: ({editor, range}) => {
                             const {to} = range;
                             editor.chain().focus().deleteRange(range).setNode('math_display').focus().run();
@@ -70,24 +71,24 @@ export default {
                     },
                     {
                         icon: 'table_chart',
-                        title: '테이블',
-                        subtitle: '표',
+                        title: i18n('table'),
+                        subtitle: i18n('tableInfo'),
                         command: ({editor, range}) => {
                             editor.chain().focus().insertTable({rows: 2, cols: 3}).run();
                         }
                     },
                     {
                         icon: 'iframe',
-                        title: '프레임',
-                        subtitle: '다른 웹사이트 삽입',
+                        title: i18n('iframe'),
+                        subtitle: i18n('iframeInfo'),
                         command: ({editor, range}) => {
                             slashDetail.set('iframe');
                         }
                     },
                     {
                         icon: 'youtube_activity',
-                        title: '유튜브',
-                        subtitle: '유튜브 임베드',
+                        title: i18n('youtube'),
+                        subtitle: i18n('youtubeInfo'),
                         command: ({editor, range}) => {
                             slashDetail.set('youtube');
                         }
@@ -97,7 +98,10 @@ export default {
         ]
 
         const filtered = raw.map(({section, list}) =>
-            ({section, list: list.filter((item) => item.title.toLowerCase().includes(query.toLowerCase()))})).filter(({list}) => list.length > 0);
+            ({
+                section, list: list.filter((item) => item.title.toLowerCase().includes(query.toLowerCase())
+                    || item.subtitle.toLowerCase().includes(query.toLowerCase()))
+            })).filter(({list}) => list.length > 0);
 
         return filtered;
     },

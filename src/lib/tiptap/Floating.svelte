@@ -1,9 +1,9 @@
 <script lang="ts">
-    import {BubbleMenu, FloatingMenu} from "svelte-tiptap";
+    import {FloatingMenu} from "svelte-tiptap";
     import {getContext} from "svelte";
-    import {Button, IconButton, List, OneLine, Tooltip} from "nunui";
+    import {IconButton, List, OneLine, Tooltip} from "nunui";
     import ToolbarButton from "$lib/tiptap/ToolbarButton.svelte";
-    import setMath from "$lib/tiptap/setMath";
+    import i18n from "$lib/i18n";
 
     const tiptap = getContext<any>('editor')
 </script>
@@ -13,16 +13,16 @@
                   tippyOptions={{animation:'fade', duration: [200, 50]}}>
         <main on:mousedown={() => setTimeout(() => $tiptap.commands.focus())}>
             <span>
-                /로 명령어 입력. 또는
+                {i18n('newLineInfo')}
             </span>
             <Tooltip bottom left xstack width="160px">
                 <IconButton size="1.2em" icon="text_fields" slot="target"/>
                 <div style="margin: -6px">
                     <List>
-                        <OneLine icon="counter_1" title="제목 1" on:click={() => $tiptap.commands.setHeading({level: 1})}/>
-                        <OneLine icon="counter_2" title="제목 2" on:click={() => $tiptap.commands.setHeading({level: 2})}/>
-                        <OneLine icon="counter_3" title="제목 3" on:click={() => $tiptap.commands.setHeading({level: 3})}/>
-                        <OneLine icon="segment" title="본문" on:click={() => $tiptap.commands.setParagraph()}/>
+                        <OneLine icon="counter_1" title="{i18n('title')} 1" on:click={() => $tiptap.commands.setHeading({level: 1})}/>
+                        <OneLine icon="counter_2" title="{i18n('title')} 2" on:click={() => $tiptap.commands.setHeading({level: 2})}/>
+                        <OneLine icon="counter_3" title="{i18n('title')} 3" on:click={() => $tiptap.commands.setHeading({level: 3})}/>
+                        <OneLine icon="segment" title={i18n('paragraph')} on:click={() => $tiptap.commands.setParagraph()}/>
                     </List>
                 </div>
             </Tooltip>
