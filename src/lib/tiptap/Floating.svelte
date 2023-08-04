@@ -19,10 +19,10 @@
                 <IconButton size="1.2em" icon="text_fields" slot="target"/>
                 <div style="margin: -6px">
                     <List>
-                        <OneLine title="제목 1" on:click={() => $tiptap.commands.setHeading({level: 1})}/>
-                        <OneLine title="제목 2" on:click={() => $tiptap.commands.setHeading({level: 2})}/>
-                        <OneLine title="제목 3" on:click={() => $tiptap.commands.setHeading({level: 3})}/>
-                        <OneLine title="본문" on:click={() => $tiptap.commands.setParagraph()}/>
+                        <OneLine icon="counter_1" title="제목 1" on:click={() => $tiptap.commands.setHeading({level: 1})}/>
+                        <OneLine icon="counter_2" title="제목 2" on:click={() => $tiptap.commands.setHeading({level: 2})}/>
+                        <OneLine icon="counter_3" title="제목 3" on:click={() => $tiptap.commands.setHeading({level: 3})}/>
+                        <OneLine icon="segment" title="본문" on:click={() => $tiptap.commands.setParagraph()}/>
                     </List>
                 </div>
             </Tooltip>

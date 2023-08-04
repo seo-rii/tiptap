@@ -36,7 +36,12 @@ export default (element: Element, content: string, {
         StarterKit,
         Underline,
         Highlight.configure({multicolor: true}),
-        Link.configure({openOnClick: true}),
+        Link.configure({
+            openOnClick: true, protocols: ['ftp', 'mailto', {
+                scheme: 'tel',
+                optionalSlashes: true
+            }]
+        }),
         TextAlign.configure({types: ['heading', 'paragraph', 'image']}),
         DropCursor,
         orderedlist,

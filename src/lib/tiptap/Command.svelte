@@ -54,7 +54,7 @@
   }
 
   main {
-    position: absolute;
+    position: fixed;
     background: var(--surface, #fff);
     width: 220px;
     border-radius: 4px;
