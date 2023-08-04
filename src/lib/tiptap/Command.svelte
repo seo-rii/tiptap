@@ -1,7 +1,7 @@
 <script lang="ts">
-    import {List, TwoLine} from "nunui";
-    import {getContext} from "svelte";
-    import {slashVisible, slashItems, slashLocaltion, slashProps} from '../plugin/command/stores';
+    import {Button, IconButton, Input, List, TwoLine} from "nunui";
+    import {getContext, tick} from "svelte";
+    import {slashVisible, slashItems, slashLocaltion, slashProps, slashDetail} from '../plugin/command/stores';
     import {fly, slide} from "svelte/transition";
     import {quartOut} from "svelte/easing";
 
@@ -9,6 +9,11 @@
     export let selectedIndex = 0;
 
     let height = 0, elements = [];
+    let iframe = '';
+
+    $: if ($slashVisible) {
+        iframe = '';
+    }
 </script>
 
 <svelte:window bind:innerHeight={height}/>
@@ -18,27 +23,47 @@
     <main style="left: {$slashLocaltion.x}px; top: {$slashLocaltion.y + $slashLocaltion.height + 384 > height
 			? $slashLocaltion.y - $slashLocaltion.height - 384
 			: $slashLocaltion.y + $slashLocaltion.height}px;" transition:fly={{y: 10, duration: 200, easing: quartOut}}>
-        <div class="list">
-            <List>
-                {#each $slashItems as {section, list}(section)}
-                    <div class="section" transition:slide={{duration: 400, easing: quartOut}}>{section}</div>
-                    <div transition:slide={{duration: 400, easing: quartOut}}>
-                        {#each list || [] as {title, subtitle, icon, command, section}, i(title)}
-                            <div transition:slide={{duration: 400, easing: quartOut}}>
-                                <TwoLine on:mouseenter={() => (selectedIndex = i)} on:click={() => {
-                                    $slashVisible = false;
+        {#if $slashDetail === 'iframe'}
+            <div class="detail">
+                <header>
+                    <IconButton icon="arrow_back" on:click={() => $slashDetail = ''}/>
+                    <div class="title">iframe</div>
+                </header>
+                <Input placeholder="url" fullWidth bind:value={iframe} autofocus
+                       on:submit={() => $tiptap.commands.insertContent({type: 'iframe', attrs: {src: iframe}})}/>
+                <footer>
+                    <Button tabindex="0" transparent small on:click={() => {
+                                iframe = ''
+                                $slashDetail = ''
+                            }}>취소
+                    </Button>
+                    <Button tabindex="0" transparent small
+                            on:click={() => $tiptap.commands.insertContent({type: 'iframe', attrs: {src: iframe}})}>삽입
+                    </Button>
+                </footer>
+            </div>
+        {:else}
+            <div class="list">
+                <List>
+                    {#each $slashItems as {section, list}(section)}
+                        <div class="section" transition:slide={{duration: 400, easing: quartOut}}>{section}</div>
+                        <div transition:slide={{duration: 400, easing: quartOut}}>
+                            {#each list || [] as {title, subtitle, icon, command, section}, i(title)}
+                                <div transition:slide={{duration: 400, easing: quartOut}}>
+                                    <TwoLine on:mouseenter={() => (selectedIndex = i)} on:click={() => {
                                     command?.($slashProps);
                                     setTimeout(() => $tiptap.commands.focus());
                                 }} bind:this={elements[i]} {icon} {title} subtitle={subtitle || ''}/>
-                            </div>
-                        {/each}
-                    </div>
-                {/each}
-                {#if !$slashItems.length}
-                    <div class="section" transition:slide={{duration: 400, easing: quartOut}}>결과 없음</div>
-                {/if}
-            </List>
-        </div>
+                                </div>
+                            {/each}
+                        </div>
+                    {/each}
+                    {#if !$slashItems.length}
+                        <div class="section" transition:slide={{duration: 400, easing: quartOut}}>결과 없음</div>
+                    {/if}
+                </List>
+            </div>
+        {/if}
     </main>
 {/if}
 
@@ -87,5 +112,32 @@
         color: var(--primary-dark1);
       }
     }
+  }
+
+  .detail {
+    font-size: 0.8em;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+
+    & > :global(*) {
+      margin-right: 8px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+
+  footer {
+    margin-top: 0.6em;
+    display: flex;
+    justify-content: flex-end;
   }
 </style>

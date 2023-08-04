@@ -1,4 +1,4 @@
-import {slashVisible, slashItems, slashLocaltion, slashProps} from './stores';
+import {slashVisible, slashItems, slashLocaltion, slashProps, slashDetail} from './stores';
 
 export default {
     items: ({query}) => {
@@ -75,6 +75,14 @@ export default {
                         command: ({editor, range}) => {
                             editor.chain().focus().insertTable({rows: 2, cols: 3}).run();
                         }
+                    },
+                    {
+                        icon: 'iframe',
+                        title: '프레임',
+                        subtitle: '다른 웹사이트 삽입',
+                        command: ({editor, range}) => {
+                            slashDetail.set('iframe');
+                        }
                     }
                 ]
             }
@@ -96,6 +104,7 @@ export default {
                 slashVisible.set(true);
                 slashLocaltion.set({x: location.x, y: location.y, height: location.height});
                 slashItems.set(props.items);
+                slashDetail.set(null);
             },
 
             onUpdate(props) {
