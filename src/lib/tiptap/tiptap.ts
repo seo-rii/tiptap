@@ -24,60 +24,64 @@ import Iframe from "$lib/plugin/iframe";
 import {MathInline, MathBlock} from "@seorii/prosemirror-math/tiptap";
 import Youtube from "$lib/plugin/youtube";
 
-import command from "$lib/plugin/command";
+import command from "$lib/plugin/command/suggest";
+import emoji from "$lib/plugin/command/emoji";
 
 export default (element: Element, content: string, {
     plugins = [],
     ...props
-}: any = {}) => new Editor({
-    element, content, ...props,
-    extensions: [
-        CodeBlockLowlight.extend({
-            addKeyboardShortcuts() {
-                return {
-                    ...this.parent?.(),
-                    'Tab': () => {
-                        if (this.editor.isActive('codeBlock')) {
-                            return this.editor.commands.insertContent('    ');
+}: any = {}) => {
+    const tt = new Editor({
+        element, content, ...props,
+        extensions: [
+            CodeBlockLowlight.extend({
+                addKeyboardShortcuts() {
+                    return {
+                        ...this.parent?.(),
+                        'Tab': () => {
+                            if (this.editor.isActive('codeBlock')) {
+                                return this.editor.commands.insertContent('    ');
+                            }
+                            return true;
                         }
-                        return true;
                     }
                 }
-            }
-        }).configure({lowlight}),
-        Image,
-        Youtube,
-        StarterKit,
-        Underline,
-        Highlight.configure({multicolor: true}),
-        Link.configure({
-            openOnClick: true, protocols: ['ftp', 'mailto', {
-                scheme: 'tel',
-                optionalSlashes: true
-            }]
-        }),
-        TextAlign.configure({types: ['heading', 'paragraph', 'image']}),
-        DropCursor,
-        orderedlist,
-        MathInline,
-        MathBlock,
-        table,
-        tableHeader,
-        tableRow,
-        tableCell,
-        Superscript,
-        Subscript,
-        Indent,
-        Color,
-        TextStyle,
-        Iframe,
-        Code.extend({
-            renderHTML({HTMLAttributes}) {
-                return ['code', mergeAttributes(HTMLAttributes, {class: 'inline'})]
-            }
-        }),
-        command,
-        ...plugins,
-    ],
-})
-;
+            }).configure({lowlight}),
+            Image,
+            Youtube,
+            StarterKit,
+            Underline,
+            Highlight.configure({multicolor: true}),
+            Link.configure({
+                openOnClick: true, protocols: ['ftp', 'mailto', {
+                    scheme: 'tel',
+                    optionalSlashes: true
+                }]
+            }),
+            TextAlign.configure({types: ['heading', 'paragraph', 'image']}),
+            DropCursor,
+            orderedlist,
+            MathInline,
+            MathBlock,
+            table,
+            tableHeader,
+            tableRow,
+            tableCell,
+            Superscript,
+            Subscript,
+            Indent,
+            Color,
+            TextStyle,
+            Iframe,
+            Code.extend({
+                renderHTML({HTMLAttributes}) {
+                    return ['code', mergeAttributes(HTMLAttributes, {class: 'inline'})]
+                }
+            }),
+            ...plugins,
+        ],
+    })
+    tt.registerPlugin(emoji(tt));
+    tt.registerPlugin(command(tt));
+    return tt;
+}

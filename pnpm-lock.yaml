@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@justinribeiro/lite-youtube':
     specifier: ^1.5.0
@@ -73,6 +77,12 @@ dependencies:
   '@tiptap/suggestion':
     specifier: ^2.0.4
     version: 2.0.4(@tiptap/core@2.0.4)(@tiptap/pm@2.0.4)
+  emojis-keywords:
+    specifier: ^2.0.0
+    version: 2.0.0
+  emojis-list:
+    specifier: ^3.0.0
+    version: 3.0.0
   lowlight:
     specifier: ^2.9.0
     version: 2.9.0
@@ -1615,6 +1625,16 @@ packages:
   /email-addresses@5.0.0:
     resolution: {integrity: sha512-4OIPYlA6JXqtVn8zpHpGiI7vE6EQOAg16aGnDMIAlZVinnoZ8208tW1hAbjWydgN/4PLTT9q+O1K6AH/vALJGw==}
     dev: true
+
+  /emojis-keywords@2.0.0:
+    resolution: {integrity: sha512-arBNEGi5UnCOmG5U1qJMPBvG6lEAV0zimJsPHJKRpPxeiUzGuu41E/pkm2lzaxA9JHHGX+jy6hdfN8CXy9I0Ug==}
+    engines: {node: '>= 0.10.0', npm: '>= 1.4.0'}
+    dev: false
+
+  /emojis-list@3.0.0:
+    resolution: {integrity: sha512-/kyM18EfinwXZbno9FyUGeFh87KC8HRQBQGildHZbEuRyWFOmv1U10o9BBp8XVZDVNNuQKyIGIu5ZYAAXJ0V2Q==}
+    engines: {node: '>= 4'}
+    dev: false
 
   /entities@3.0.1:
     resolution: {integrity: sha512-WiyBqoomrwMdFG1e0kqvASYfnlb0lp8M5o5Fw2OFq1hNZxxcNk8Ik0Xm7LxzBhuidnZB/UtBqVCgUz3kBOP51Q==}

@@ -70,14 +70,16 @@
 
     function handleKeydown(event) {
         if (!$slashVisible) return;
+        let count = $slashItems.length;
+        if ($slashItems[0]?.list) count = $slashItems.reduce((acc, item) => acc + item.list.length, 0);
         if (event.key === 'ArrowUp') {
             event.preventDefault();
-            selectedIndex = (selectedIndex + $slashItems.length - 1) % $slashItems.length;
+            selectedIndex = (selectedIndex + count - 1) % count;
             return true;
         }
         if (event.key === 'ArrowDown') {
             event.preventDefault();
-            selectedIndex = (selectedIndex + 1) % $slashItems.length;
+            selectedIndex = (selectedIndex + 1) % count;
             return true;
         }
 
@@ -91,11 +93,10 @@
     }
 
     function selectItem(index) {
-        const item = $slashItems[index];
-
+        const item = $slashItems[0]?.list ? $slashItems.map(i => i.list).flat()[index] : $slashItems[index];
         if (item) {
             let range = $slashProps.range;
-            item.command({editor: editable, range});
+            item.command({editor: $tiptap, range});
         }
     }
 </script>

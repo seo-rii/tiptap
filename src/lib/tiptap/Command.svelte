@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Button, IconButton, Input, List, TwoLine} from "nunui";
+    import {Button, IconButton, Input, List, OneLine, TwoLine} from "nunui";
     import {getContext} from "svelte";
     import {slashVisible, slashItems, slashLocaltion, slashProps, slashDetail} from '../plugin/command/stores';
     import {fly, slide} from "svelte/transition";
@@ -62,18 +62,36 @@
                     </Button>
                 </footer>
             </div>
+        {:else if $slashDetail === 'emoji'}
+            <div class="list">
+                <List>
+                    {#each $slashItems as {title, command}, i(title)}
+                        <div transition:slide={{duration: 400, easing: quartOut}}>
+                            <OneLine on:click={() => {
+                                command?.($slashProps);
+                                setTimeout(() => $tiptap.commands.focus());
+                            }} bind:this={elements[i]} {title} active={selectedIndex === i}/>
+                        </div>
+                    {/each}
+                    {#if !$slashItems.length}
+                        <div class="section"
+                             transition:slide={{duration: 400, easing: quartOut}}>{i18n('noResult')}</div>
+                    {/if}
+                </List>
+            </div>
         {:else}
             <div class="list">
                 <List>
-                    {#each $slashItems as {section, list}(section)}
+                    {#each $slashItems as {section, list}, j(section)}
+                        {@const lastCount = $slashItems.slice(0, j).reduce((acc, cur) => acc + cur.list.length, 0)}
                         <div class="section" transition:slide={{duration: 400, easing: quartOut}}>{section}</div>
                         <div transition:slide={{duration: 400, easing: quartOut}}>
                             {#each list || [] as {title, subtitle, icon, command, section}, i(title)}
                                 <div transition:slide={{duration: 400, easing: quartOut}}>
-                                    <TwoLine on:mouseenter={() => (selectedIndex = i)} on:click={() => {
+                                    <TwoLine on:mouseenter={() => (selectedIndex = i + lastCount)} on:click={() => {
                                         command?.($slashProps);
                                         setTimeout(() => $tiptap.commands.focus());
-                                    }} bind:this={elements[i]} {icon} {title} subtitle={subtitle || ''}/>
+                                    }} bind:this={elements[i + lastCount]} {icon} {title} subtitle={subtitle || ''} active={selectedIndex === i + lastCount}/>
                                 </div>
                             {/each}
                         </div>
