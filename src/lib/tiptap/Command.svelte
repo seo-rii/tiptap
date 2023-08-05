@@ -1,7 +1,14 @@
 <script lang="ts">
     import {Button, IconButton, Input, List, OneLine, TwoLine} from "nunui";
     import {getContext} from "svelte";
-    import {slashVisible, slashItems, slashLocaltion, slashProps, slashDetail} from '../plugin/command/stores';
+    import {
+        slashVisible,
+        slashItems,
+        slashLocaltion,
+        slashProps,
+        slashDetail,
+        slashSelection
+    } from '../plugin/command/stores';
     import {fly, slide} from "svelte/transition";
     import {quartOut} from "svelte/easing";
     import i18n from "$lib/i18n";
@@ -10,11 +17,12 @@
     export let selectedIndex = 0;
 
     let height = 0, elements = [];
-    let iframe = '';
+    let iframe = '', focus: any;
 
     $: if ($slashVisible) {
         iframe = '';
     }
+    $: setTimeout(() => focus?.focus?.(), 100);
 </script>
 
 <svelte:window bind:innerHeight={height}/>
@@ -30,16 +38,19 @@
                     <IconButton icon="arrow_back" on:click={() => $slashDetail = ''}/>
                     <div class="title">iframe</div>
                 </header>
-                <Input placeholder="url" fullWidth bind:value={iframe} autofocus
+                <Input placeholder="url" fullWidth bind:value={iframe} bind:input={focus}
                        on:submit={() => $tiptap.commands.insertContent({type: 'iframe', attrs: {src: iframe}})}/>
                 <footer>
                     <Button tabindex="0" transparent small on:click={() => {
-                                iframe = ''
-                                $slashDetail = ''
-                            }}>{i18n('cancel')}
+                        iframe = ''
+                        $slashDetail = ''
+                    }}>{i18n('cancel')}
                     </Button>
                     <Button tabindex="0" transparent small
-                            on:click={() => $tiptap.commands.insertContent({type: 'iframe', attrs: {src: iframe}})}>{i18n('insert')}
+                            on:click={() => {
+                                $slashSelection?.();
+                                $tiptap.commands.insertContent({type: 'iframe', attrs: {src: iframe}})}
+                            }>{i18n('insert')}
                     </Button>
                 </footer>
             </div>
@@ -49,16 +60,18 @@
                     <IconButton icon="arrow_back" on:click={() => $slashDetail = ''}/>
                     <div class="title">Youtube</div>
                 </header>
-                <Input placeholder="url" fullWidth bind:value={iframe} autofocus
+                <Input placeholder="url" fullWidth bind:value={iframe} bind:input={focus}
                        on:submit={() => $tiptap.commands.insertVideoPlayer({url: iframe})}/>
                 <footer>
                     <Button tabindex="0" transparent small on:click={() => {
-                                iframe = ''
-                                $slashDetail = ''
-                            }}>{i18n('cancel')}
+                        iframe = ''
+                        $slashDetail = ''
+                    }}>{i18n('cancel')}
                     </Button>
-                    <Button tabindex="0" transparent small
-                            on:click={() => $tiptap.commands.insertVideoPlayer({url: iframe})}>{i18n('insert')}
+                    <Button tabindex="0" transparent small on:click={() => {
+                        $slashSelection?.();
+                        $tiptap.commands.insertVideoPlayer({url: iframe});
+                    }}>{i18n('insert')}
                     </Button>
                 </footer>
             </div>
@@ -91,7 +104,8 @@
                                     <TwoLine on:mouseenter={() => (selectedIndex = i + lastCount)} on:click={() => {
                                         command?.($slashProps);
                                         setTimeout(() => $tiptap.commands.focus());
-                                    }} bind:this={elements[i + lastCount]} {icon} {title} subtitle={subtitle || ''} active={selectedIndex === i + lastCount}/>
+                                    }} bind:this={elements[i + lastCount]} {icon} {title} subtitle={subtitle || ''}
+                                             active={selectedIndex === i + lastCount}/>
                                 </div>
                             {/each}
                         </div>

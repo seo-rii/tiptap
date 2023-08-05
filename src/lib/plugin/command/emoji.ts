@@ -43,7 +43,7 @@ export const emoji = {
         const filtered = []
         for (let i = 0; i < emojis.length; i++) {
             if (tags[i]?.includes?.(query)) filtered.push({
-                title: emojis[i] + ' ' + tags[i],
+                title: emojis[i] + '  ' + tags[i],
                 command: ({editor, range}) => {
                     editor.chain().deleteRange(fixRange(editor, range, ':')).insertContent(emojis[i]).run();
                 }

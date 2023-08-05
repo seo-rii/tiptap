@@ -9,7 +9,7 @@
     background-color: var(--primary-light6);
     opacity: 0;
 
-    .editor & {
+    .editable & {
       opacity: 1;
     }
   }
@@ -17,7 +17,7 @@
   &.resize-cursor {
     pointer-events: none;
 
-    .editor & {
+    .editable & {
       pointer-events: initial;
       cursor: ew-resize;
       cursor: col-resize; /* stylelint-disable declaration-block-no-duplicate-properties */

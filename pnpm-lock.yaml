@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 dependencies:
   '@justinribeiro/lite-youtube':
     specifier: ^1.5.0
@@ -78,11 +74,11 @@ dependencies:
     specifier: ^2.0.4
     version: 2.0.4(@tiptap/core@2.0.4)(@tiptap/pm@2.0.4)
   emojis-keywords:
-    specifier: ^2.0.0
+    specifier: 2.0.0
     version: 2.0.0
   emojis-list:
-    specifier: ^3.0.0
-    version: 3.0.0
+    specifier: 2.0.0
+    version: 2.0.0
   lowlight:
     specifier: ^2.9.0
     version: 2.9.0
@@ -1631,9 +1627,9 @@ packages:
     engines: {node: '>= 0.10.0', npm: '>= 1.4.0'}
     dev: false
 
-  /emojis-list@3.0.0:
-    resolution: {integrity: sha512-/kyM18EfinwXZbno9FyUGeFh87KC8HRQBQGildHZbEuRyWFOmv1U10o9BBp8XVZDVNNuQKyIGIu5ZYAAXJ0V2Q==}
-    engines: {node: '>= 4'}
+  /emojis-list@2.0.0:
+    resolution: {integrity: sha512-dha5dkOEbhOyxxCesGhOtP9VxzW7N3E3FVK7vOwhsr4pQ7p+jobXGCAfXgcpOLBPyrwvw55xIoY+sbd6Y9ShkA==}
+    engines: {node: '>= 0.10'}
     dev: false
 
   /entities@3.0.1:
@@ -3173,3 +3169,7 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false

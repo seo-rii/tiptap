@@ -1,4 +1,4 @@
-import {slashVisible, slashItems, slashLocaltion, slashProps, slashDetail} from './stores';
+import {slashVisible, slashItems, slashLocaltion, slashProps, slashDetail, slashSelection} from './stores';
 import i18n from "$lib/i18n";
 import type {UploadFn} from "$lib/plugin/image/dragdrop";
 import {fallbackUpload} from "$lib/plugin/image/dragdrop";
@@ -144,6 +144,7 @@ export const suggest = {
                         title: i18n('iframe'),
                         subtitle: i18n('iframeInfo'),
                         command: ({editor, range}) => {
+                            slashSelection.set(() => editor.chain().focus().deleteRange(fixRange(editor, range)).run());
                             slashDetail.set('iframe');
                         }
                     },
@@ -152,6 +153,7 @@ export const suggest = {
                         title: i18n('youtube'),
                         subtitle: i18n('youtubeInfo'),
                         command: ({editor, range}) => {
+                            slashSelection.set(() => editor.chain().focus().deleteRange(fixRange(editor, range)).run());
                             slashDetail.set('youtube');
                         }
                     }
