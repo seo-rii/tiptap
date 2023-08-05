@@ -71,9 +71,9 @@
                             {#each list || [] as {title, subtitle, icon, command, section}, i(title)}
                                 <div transition:slide={{duration: 400, easing: quartOut}}>
                                     <TwoLine on:mouseenter={() => (selectedIndex = i)} on:click={() => {
-                                    command?.($slashProps);
-                                    setTimeout(() => $tiptap.commands.focus());
-                                }} bind:this={elements[i]} {icon} {title} subtitle={subtitle || ''}/>
+                                        command?.($slashProps);
+                                        setTimeout(() => $tiptap.commands.focus());
+                                    }} bind:this={elements[i]} {icon} {title} subtitle={subtitle || ''}/>
                                 </div>
                             {/each}
                         </div>

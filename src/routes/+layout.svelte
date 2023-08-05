@@ -58,7 +58,6 @@
       margin: 0;
       padding: 0;
       font: normal 300 16px 'Spoqa Han Sans Neo', 'sans-serif';
-      height: 100%;
     }
 
     body > div > main {
