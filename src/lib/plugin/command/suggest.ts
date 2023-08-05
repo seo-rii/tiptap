@@ -1,5 +1,7 @@
 import {slashVisible, slashItems, slashLocaltion, slashProps, slashDetail} from './stores';
 import i18n from "$lib/i18n";
+import type {UploadFn} from "$lib/plugin/image/dragdrop";
+import {fallbackUpload} from "$lib/plugin/image/dragdrop";
 
 export default {
     items: ({query}) => {
@@ -52,6 +54,27 @@ export default {
             },
             {
                 section: i18n('block'), list: [
+                    {
+                        icon: 'image',
+                        title: i18n('image'),
+                        subtitle: i18n('imageInfo'),
+                        command: ({editor, range}) => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.onchange = async () => {
+                                if (input.files) {
+                                    const file = input.files[0];
+                                    if (file) {
+                                        const upload: UploadFn = (<any>window).__image_uploader || fallbackUpload;
+                                        const src = await upload(file);
+                                        editor.chain().focus().deleteRange(range).setImage({src}).run();
+                                    }
+                                }
+                            }
+                            input.click();
+                        }
+                    },
                     {
                         icon: 'code',
                         title: i18n('codeBlock'),

@@ -9,6 +9,8 @@
     import Command from "$lib/tiptap/Command.svelte";
     import {slashItems, slashProps, slashVisible} from "$lib/plugin/command/stores";
     import i18n from "$lib/i18n";
+    import type {UploadFn} from "$lib/plugin/image/dragdrop";
+    import {fallbackUpload} from "$lib/plugin/image/dragdrop";
 
     const san = (body: string) => sanitizeHtml(body, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file', 'lite-youtube', 'blockquote']),
@@ -24,12 +26,13 @@
         },
     })
 
-    export let body = '', editable = false, style = '', ref = null, options = {}
+    export let body = '', editable = false, ref = null, options = {}
+    export const imageUpload: UploadFn = fallbackUpload, style = ''
     const tiptap = setContext('editor', writable<any>(null))
     let element: Element, fullscreen = false, mounted = false, last = ''
 
-    $: ref = $tiptap
     $: $tiptap && $tiptap.setEditable(editable)
+    $: browser && ((<any>window).__image_uploader = imageUpload)
 
     if (browser) {
         onMount(() => {
@@ -37,9 +40,9 @@
             mounted = true
             Promise.all([import('./tiptap'), import("@justinribeiro/lite-youtube")]).then(([{default: tt}]) => {
                 if (!mounted) return;
-                $tiptap = tt(element, body, {
+                ref = $tiptap = tt(element, body, {
                     editable: editable,
-                    onTransaction: () => $tiptap = $tiptap,
+                    onTransaction: () => ref = $tiptap = $tiptap,
                     ...options,
                 });
                 $tiptap.on('update', ({editor: tiptap}: any) => {

@@ -103,6 +103,7 @@
     position: fixed;
     background: var(--surface, #fff);
     width: 220px;
+    max-height: 384px;
     border-radius: 4px;
     overflow-y: scroll;
     z-index: 10;
