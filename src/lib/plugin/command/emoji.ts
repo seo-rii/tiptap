@@ -45,7 +45,7 @@ export const emoji = {
             if (tags[i]?.includes?.(query)) filtered.push({
                 title: emojis[i] + '  ' + tags[i],
                 command: ({editor, range}) => {
-                    editor.chain().deleteRange(fixRange(editor, range, ':')).insertContent(emojis[i]).run();
+                    editor.chain().deleteRange(fixRange(editor, range, ':')).insertContent(emojis[i] + ' ').run();
                 }
             });
             if (filtered.length >= max) break;
