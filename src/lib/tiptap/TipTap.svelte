@@ -27,12 +27,14 @@
     })
 
     export let body = '', editable = false, ref = null, options = {}
-    export const imageUpload: UploadFn = fallbackUpload, style = ''
+    export let imageUpload: UploadFn = fallbackUpload, style = ''
+    export let blocks = []
     const tiptap = setContext('editor', writable<any>(null))
     let element: Element, fullscreen = false, mounted = false, last = ''
 
     $: $tiptap && $tiptap.setEditable(editable)
     $: browser && ((<any>window).__image_uploader = imageUpload)
+    $: browser && ((<any>window).__tiptap_blocks = blocks)
 
     if (browser) {
         onMount(() => {

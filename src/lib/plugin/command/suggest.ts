@@ -84,6 +84,7 @@ export const suggest = {
             },
             {
                 section: i18n('block'), list: [
+                    ...((<any>window).__tiptap_blocks),
                     {
                         icon: 'image',
                         title: i18n('image'),

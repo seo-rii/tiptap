@@ -39,7 +39,7 @@
                     <div class="title">iframe</div>
                 </header>
                 <Input placeholder="url" fullWidth bind:value={iframe} bind:input={focus}
-                       on:submit={() => $tiptap.commands.insertContent({type: 'iframe', attrs: {src: iframe}})}/>
+                       on:submit={() => $tiptap.chain().focus().insertContent({type: 'iframe', attrs: {src: iframe}}).insertContent('\n').run()}/>
                 <footer>
                     <Button tabindex="0" transparent small on:click={() => {
                         iframe = ''
@@ -49,8 +49,8 @@
                     <Button tabindex="0" transparent small
                             on:click={() => {
                                 $slashSelection?.();
-                                $tiptap.commands.insertContent({type: 'iframe', attrs: {src: iframe}})}
-                            }>{i18n('insert')}
+                                $tiptap.chain().focus().insertContent({type: 'iframe', attrs: {src: iframe}}).insertContent('\n').run();
+                            }}>{i18n('insert')}
                     </Button>
                 </footer>
             </div>
@@ -61,7 +61,7 @@
                     <div class="title">Youtube</div>
                 </header>
                 <Input placeholder="url" fullWidth bind:value={iframe} bind:input={focus}
-                       on:submit={() => $tiptap.commands.insertVideoPlayer({url: iframe})}/>
+                       on:submit={() => $tiptap.chain().focus().insertVideoPlayer({url: iframe}).insertContent('\n').run()}/>
                 <footer>
                     <Button tabindex="0" transparent small on:click={() => {
                         iframe = ''
@@ -70,7 +70,7 @@
                     </Button>
                     <Button tabindex="0" transparent small on:click={() => {
                         $slashSelection?.();
-                        $tiptap.commands.insertVideoPlayer({url: iframe});
+                        $tiptap.chain().focus().insertVideoPlayer({url: iframe}).insertContent('\n').run();
                     }}>{i18n('insert')}
                     </Button>
                 </footer>
