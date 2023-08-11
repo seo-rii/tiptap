@@ -23,11 +23,14 @@ import Iframe from "$lib/plugin/iframe";
 // @ts-ignore
 import {MathInline, MathBlock} from "@seorii/prosemirror-math/tiptap";
 import Youtube from "$lib/plugin/youtube";
+import Placeholder from "@tiptap/extension-placeholder";
 
 import command from "$lib/plugin/command/suggest";
 import emoji from "$lib/plugin/command/emoji";
+import i18n from "$lib/i18n";
 
 export default (element: Element, content: string, {
+    placeholder = i18n('placeholder'),
     plugins = [],
     ...props
 }: any = {}) => {
@@ -78,6 +81,7 @@ export default (element: Element, content: string, {
                     return ['code', mergeAttributes(HTMLAttributes, {class: 'inline'})]
                 }
             }),
+            Placeholder.configure({placeholder}),
             ...plugins,
         ],
     })

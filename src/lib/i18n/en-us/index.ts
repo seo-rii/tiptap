@@ -43,5 +43,6 @@ export default {
     blockquoteInfo: 'Blockquote',
 
 
-    newLineInfo: 'Press / to enter commands. Or'
+    newLineInfo: 'Press / to enter commands. Or',
+    placeholder: 'Enter content here...',
 }

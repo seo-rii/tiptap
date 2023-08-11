@@ -42,5 +42,6 @@ export default {
     youtubeInfo: '유튜브 동영상 삽입',
     blockquoteInfo: '있어보이는 인용구 삽입',
 
-    newLineInfo: '/로 명령어 입력. 또는'
+    newLineInfo: '/로 명령어 입력. 또는',
+    placeholder: '내용을 입력하세요...',
 }

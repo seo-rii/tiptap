@@ -28,7 +28,7 @@
 
     export let body = '', editable = false, ref = null, options = {}
     export let imageUpload: UploadFn = fallbackUpload, style = ''
-    export let blocks = []
+    export let blocks = [], placeholder = i18n('placeholder')
     const tiptap = setContext('editor', writable<any>(null))
     let element: Element, fullscreen = false, mounted = false, last = ''
 
@@ -43,6 +43,7 @@
             Promise.all([import('./tiptap'), import("@justinribeiro/lite-youtube")]).then(([{default: tt}]) => {
                 if (!mounted) return;
                 ref = $tiptap = tt(element, body, {
+                    placeholder,
                     editable: editable,
                     onTransaction: () => ref = $tiptap = $tiptap,
                     ...options,
@@ -175,11 +176,17 @@
 
     :global {
       .ProseMirror p.is-editor-empty:first-child::before {
-        color: #adb5bd;
+        color: var(--on-surface, #000);
+        opacity: 0.7;
         content: attr(data-placeholder);
         float: left;
         height: 0;
         pointer-events: none;
+        transition: 0.2s opacity ease-in-out;
+      }
+
+      .ProseMirror-focused p.is-editor-empty:first-child::before {
+        opacity: 0;
       }
 
       a {

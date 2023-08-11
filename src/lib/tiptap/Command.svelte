@@ -147,7 +147,7 @@
     font-size: 0.8em;
     font-weight: 300;
     color: var(--on-surface, #000);
-    opacity: 0.8;
+    opacity: 0.7;
   }
 
   .list {
