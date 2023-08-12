@@ -47,7 +47,7 @@ export default Node.create<IframeOptions>({
     },
 
     renderHTML({HTMLAttributes}) {
-        return ['div', this.options.HTMLAttributes, ['iframe', mergeAttributes(HTMLAttributes, {credentialless: true})]]
+        return ['div', this.options.HTMLAttributes, ['iframe', mergeAttributes(HTMLAttributes, {credentialless: true, crossorigin: "anonymous"})]]
     },
 
     addCommands() {

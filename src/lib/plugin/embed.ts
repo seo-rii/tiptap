@@ -51,7 +51,7 @@ export default Node.create<EmbedOptions>({
     },
 
     renderHTML({HTMLAttributes}) {
-        return ['div', this.options.HTMLAttributes, ['embed', mergeAttributes(HTMLAttributes, {credentialless: true})]]
+        return ['div', this.options.HTMLAttributes, ['embed', mergeAttributes(HTMLAttributes, {credentialless: true, crossorigin: "anonymous"})]]
     },
 
     addCommands() {
