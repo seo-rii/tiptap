@@ -1,5 +1,5 @@
 export default {
-    target: ['ko'],
+    target: ['ko', 'ko-KR'],
     lang: 'ko',
     country: 'KR',
 

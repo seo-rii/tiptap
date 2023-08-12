@@ -39,7 +39,7 @@
                     <div class="title">iframe</div>
                 </header>
                 <Input placeholder="url" fullWidth bind:value={iframe} bind:input={focus}
-                       on:submit={() => $tiptap.chain().focus().insertContent({type: 'iframe', attrs: {src: iframe}}).insertContent('\n').run()}/>
+                       on:submit={() => $tiptap.chain().focus().insertContent([{type: 'iframe', attrs: {src: iframe}}, {type: 'paragraph'}]).run()}/>
                 <footer>
                     <Button tabindex="0" transparent small on:click={() => {
                         iframe = ''
@@ -49,7 +49,7 @@
                     <Button tabindex="0" transparent small
                             on:click={() => {
                                 $slashSelection?.();
-                                $tiptap.chain().focus().insertContent({type: 'iframe', attrs: {src: iframe}}).insertContent('\n').run();
+                                $tiptap.chain().focus().insertContent([{type: 'iframe', attrs: {src: iframe}}, {type: 'paragraph'}]).run();
                             }}>{i18n('insert')}
                     </Button>
                 </footer>
