@@ -13,7 +13,7 @@
     import {fallbackUpload} from "$lib/plugin/image/dragdrop";
 
     const san = (body: string) => sanitizeHtml(body, {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file', 'lite-youtube', 'blockquote']),
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file', 'lite-youtube', 'blockquote', 'embed']),
         allowedStyles: <any>'*', allowedAttributes: {
             '*': ['style', 'class'],
             a: ['href', 'name', 'target'],
@@ -23,6 +23,7 @@
             td: ['colwidth', 'colspan', 'rowspan'],
             'tiptap-file': ['id'],
             'lite-youtube': ['videoid', 'params', 'nocookie', 'title', 'provider'],
+            embed: ['src', 'type', 'frameborder', 'allowfullscreen']
         },
     })
 
