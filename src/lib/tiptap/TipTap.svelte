@@ -51,7 +51,6 @@
                 });
                 $tiptap.on('update', ({editor: tiptap}: any) => {
                     let content = tiptap.getHTML(), json = tiptap.getJSON().content
-                    console.log(json)
                     if (Array.isArray(json) && json.length === 1 && json[0].type === 'paragraph' && !json[0].hasOwnProperty("content")) content = null
                     body = last = content
                 });
