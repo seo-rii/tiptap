@@ -27,7 +27,7 @@
         },
     })
 
-    export let body = '', editable = false, ref = null, options = {}
+    export let body = '', editable = false, ref = null, options = {}, loaded = false
     export let imageUpload: UploadFn = fallbackUpload, style = ''
     export let blocks = [], placeholder = i18n('placeholder')
     const tiptap = setContext('editor', writable<any>(null))
@@ -54,6 +54,7 @@
                     if (Array.isArray(json) && json.length === 1 && json[0].type === 'paragraph' && !json[0].hasOwnProperty("content")) content = null
                     body = last = content
                 });
+                loaded = true;
             })
 
             return () => {
@@ -109,7 +110,11 @@
     <div class="wrapper">
         <div bind:this={element} class="target" on:keydown|capture={handleKeydown}></div>
         {#if !$tiptap}
-            {i18n('loading')}
+            {#if $$slots.preloader}
+                <slot name="preloader"/>
+            {:else}
+                {i18n('loading')}
+            {/if}
         {/if}
     </div>
     {#if editable}
