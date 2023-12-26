@@ -11,6 +11,7 @@ export default {
     cancel: '취소',
     insert: '삽입',
     noResult: '결과 없음',
+    default: '기본',
 
     title: '제목',
     paragraph: '본문',

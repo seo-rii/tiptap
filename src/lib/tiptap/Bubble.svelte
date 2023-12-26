@@ -9,6 +9,7 @@
     import {Button, Icon, IconButton, Input, List, OneLine, Tooltip} from "nunui";
     import i18n from "$lib/i18n";
 
+    export let colors = [];
     const tiptap = getContext<any>('editor')
 
     let link = false, href = '', sel = '', _sel = ''
@@ -26,7 +27,6 @@
         else if ($tiptap.getAttributes('link').href) $tiptap.chain().unsetLink().run()
     }
 </script>
-
 
 {#if $tiptap}
     <BubbleMenu editor={$tiptap} updateDelay={50}
@@ -95,6 +95,22 @@
                     <ToolbarButton icon="superscript" prop="superscript"/>
                     <ToolbarButton icon="subscript" prop="subscript"/>
                     <ToolbarButton icon="functions" handler={() => setMath($tiptap)}/>
+                    <Tooltip bottom left xstack>
+                        <IconButton size="1.2em" icon="palette" slot="target"/>
+                        <div style="font-size: 0.6em">
+                            <List>
+                                <Button small outlined on:click={() => $tiptap.chain().focus().unsetColor().run()}>{i18n('default')}
+                                </Button>
+                                {#each colors as color}
+                                    <Button small outlined
+                                            on:click={() => $tiptap.chain().focus().setColor(color).run()}
+                                            style="margin-right:4px">
+                                        <span style="width: 20px; height: 16px; background: {color}; border-radius: 4px;display: inline-block;margin-bottom: -2px"></span>
+                                    </Button>
+                                {/each}
+                            </List>
+                        </div>
+                    </Tooltip>
                     <ToolbarButton icon="code" prop="code"/>
                     <ToolbarButton icon="link" prop="link" handler={() => link = true}/>
                 {/if}

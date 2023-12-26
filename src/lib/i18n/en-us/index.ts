@@ -11,6 +11,7 @@ export default {
     cancel: 'Cancel',
     insert: 'Insert',
     noResult: 'No result',
+    default: 'default',
 
     title: 'Title',
     paragraph: 'Paragraph',

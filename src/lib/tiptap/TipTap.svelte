@@ -30,6 +30,16 @@
     export let body = '', editable = false, ref = null, options = {}, loaded = false
     export let imageUpload: UploadFn = fallbackUpload, style = ''
     export let blocks = [], placeholder = i18n('placeholder')
+    export let colors = [
+        '#ef5350',//red
+        '#ec407a',//pink
+        '#ff7043',//orange
+        '#daca3b',//yellow
+        '#8bc34a',//green
+        '#2196f3',//blue
+        '#3f51b5',//blue
+        '#ab47bc',//purple
+    ]
     const tiptap = setContext('editor', writable<any>(null))
     let element: Element, fullscreen = false, mounted = false, last = ''
 
@@ -121,11 +131,11 @@
         <Command {selectedIndex}/>
         <Floating/>
         {#if $$slots.bubble}
-            <Bubble>
+            <Bubble {colors}>
                 <slot name="bubble"/>
             </Bubble>
         {:else}
-            <Bubble/>
+            <Bubble {colors}/>
         {/if}
     {/if}
 </main>
