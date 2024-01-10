@@ -22,7 +22,7 @@
         link = false
         href = $tiptap.getAttributes('link').href
     }
-    $: if ($tiptap) {
+    $: if ($tiptap && link) {
         if (href) $tiptap.chain().setLink({href}).run()
         else if ($tiptap.getAttributes('link').href) $tiptap.chain().unsetLink().run()
     }

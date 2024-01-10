@@ -9,8 +9,7 @@
 </script>
 
 {#if $tiptap}
-    <FloatingMenu editor={$tiptap}
-                  tippyOptions={{animation:'fade', duration: [200, 50]}}>
+    <FloatingMenu editor={$tiptap} tippyOptions={{animation:'fade', duration: [200, 50]}}>
         <main on:mousedown={() => setTimeout(() => $tiptap.commands.focus())}>
             <span>
                 {i18n('newLineInfo')}
@@ -19,10 +18,14 @@
                 <IconButton size="1.2em" icon="text_fields" slot="target"/>
                 <div style="margin: -6px">
                     <List>
-                        <OneLine icon="counter_1" title="{i18n('title')} 1" on:click={() => $tiptap.commands.setHeading({level: 1})}/>
-                        <OneLine icon="counter_2" title="{i18n('title')} 2" on:click={() => $tiptap.commands.setHeading({level: 2})}/>
-                        <OneLine icon="counter_3" title="{i18n('title')} 3" on:click={() => $tiptap.commands.setHeading({level: 3})}/>
-                        <OneLine icon="segment" title={i18n('paragraph')} on:click={() => $tiptap.commands.setParagraph()}/>
+                        <OneLine icon="counter_1" title="{i18n('title')} 1"
+                                 on:click={() => $tiptap.commands.setHeading({level: 1})}/>
+                        <OneLine icon="counter_2" title="{i18n('title')} 2"
+                                 on:click={() => $tiptap.commands.setHeading({level: 2})}/>
+                        <OneLine icon="counter_3" title="{i18n('title')} 3"
+                                 on:click={() => $tiptap.commands.setHeading({level: 3})}/>
+                        <OneLine icon="segment" title={i18n('paragraph')}
+                                 on:click={() => $tiptap.commands.setParagraph()}/>
                     </List>
                 </div>
             </Tooltip>
