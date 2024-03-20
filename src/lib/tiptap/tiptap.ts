@@ -1,6 +1,6 @@
 import {Editor, mergeAttributes} from "@tiptap/core";
 import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
-import {lowlight} from "lowlight";
+import {all, createLowlight} from 'lowlight';
 import Code from "@tiptap/extension-code";
 import Image from "$lib/plugin/image";
 import StarterKit from "@tiptap/starter-kit";
@@ -30,11 +30,33 @@ import command from "$lib/plugin/command/suggest";
 import emoji from "$lib/plugin/command/emoji";
 import i18n from "$lib/i18n";
 
+import js from 'highlight.js/lib/languages/javascript'
+import ts from 'highlight.js/lib/languages/typescript'
+import python from 'highlight.js/lib/languages/python'
+import cpp from 'highlight.js/lib/languages/cpp'
+import java from 'highlight.js/lib/languages/java'
+import kotlin from 'highlight.js/lib/languages/kotlin'
+import go from 'highlight.js/lib/languages/go'
+import csharp from 'highlight.js/lib/languages/csharp'
+import rust from 'highlight.js/lib/languages/rust'
+
 export default (element: Element, content: string, {
     placeholder = i18n('placeholder'),
     plugins = [],
     ...props
 }: any = {}) => {
+    const lowlight = createLowlight(all)
+
+    lowlight.register('js', js)
+    lowlight.register('ts', ts)
+    lowlight.register('python', python)
+    lowlight.register('cpp', cpp)
+    lowlight.register('java', java)
+    lowlight.register('kotlin', kotlin)
+    lowlight.register('go', go)
+    lowlight.register('csharp', csharp)
+    lowlight.register('rust', rust)
+
     const tt = new Editor({
         element, content, ...props,
         extensions: [
