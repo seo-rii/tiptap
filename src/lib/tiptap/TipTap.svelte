@@ -187,6 +187,10 @@
     outline: 3px solid var(--primary);
   }
 
+  .editable :global(lite-youtube.ProseMirror-selectednode) {
+    outline: 3px solid var(--primary);
+  }
+
   div > :global(div) {
     outline: none !important;
 
@@ -244,6 +248,10 @@
 
       .math-render {
         cursor: initial;
+      }
+
+      :global(lite-youtube) {
+        border-radius: 12px;
       }
 
       .iframe-wrapper {

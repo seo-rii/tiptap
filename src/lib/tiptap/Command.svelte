@@ -17,10 +17,10 @@
     export let selectedIndex = 0;
 
     let height = 0, elements = [];
-    let iframe = '', focus: any;
+    let input = '', focus: any;
 
     $: if ($slashVisible) {
-        iframe = '';
+        input = '';
     }
     $: setTimeout(() => focus?.focus?.(), 100);
 </script>
@@ -32,50 +32,7 @@
     <main style="left: {$slashLocaltion.x}px; top: {$slashLocaltion.y + $slashLocaltion.height + 384 > height
 			? $slashLocaltion.y - $slashLocaltion.height - 384
 			: $slashLocaltion.y + $slashLocaltion.height}px;" transition:fly={{y: 10, duration: 200, easing: quartOut}}>
-        {#if $slashDetail === 'iframe'}
-            <div class="detail">
-                <header>
-                    <IconButton icon="arrow_back" on:click={() => $slashDetail = ''}/>
-                    <div class="title">iframe</div>
-                </header>
-                <Input placeholder="url" fullWidth bind:value={iframe} bind:input={focus}
-                       on:submit={() => $tiptap.chain().focus().insertContent([{type: 'iframe', attrs: {src: iframe}}, {type: 'paragraph'}]).run()}/>
-                <footer>
-                    <Button tabindex="0" transparent small on:click={() => {
-                        iframe = ''
-                        $slashDetail = ''
-                    }}>{i18n('cancel')}
-                    </Button>
-                    <Button tabindex="0" transparent small
-                            on:click={() => {
-                                $slashSelection?.();
-                                $tiptap.chain().focus().insertContent([{type: 'iframe', attrs: {src: iframe}}, {type: 'paragraph'}]).run();
-                            }}>{i18n('insert')}
-                    </Button>
-                </footer>
-            </div>
-        {:else if $slashDetail === 'youtube'}
-            <div class="detail">
-                <header>
-                    <IconButton icon="arrow_back" on:click={() => $slashDetail = ''}/>
-                    <div class="title">Youtube</div>
-                </header>
-                <Input placeholder="url" fullWidth bind:value={iframe} bind:input={focus}
-                       on:submit={() => $tiptap.chain().focus().insertVideoPlayer({url: iframe}).insertContent('\n').run()}/>
-                <footer>
-                    <Button tabindex="0" transparent small on:click={() => {
-                        iframe = ''
-                        $slashDetail = ''
-                    }}>{i18n('cancel')}
-                    </Button>
-                    <Button tabindex="0" transparent small on:click={() => {
-                        $slashSelection?.();
-                        $tiptap.chain().focus().insertVideoPlayer({url: iframe}).insertContent('\n').run();
-                    }}>{i18n('insert')}
-                    </Button>
-                </footer>
-            </div>
-        {:else if $slashDetail === 'emoji'}
+        {#if $slashDetail === 'emoji'}
             <div class="list">
                 <List>
                     {#each $slashItems as {title, command}, i(title)}
@@ -91,6 +48,31 @@
                              transition:slide={{duration: 400, easing: quartOut}}>{i18n('noResult')}</div>
                     {/if}
                 </List>
+            </div>
+        {:else if $slashDetail}
+            <div class="detail">
+                <header>
+                    <IconButton icon="arrow_back" on:click={() => $slashDetail = null}/>
+                    <div class="title">{$slashDetail.title}</div>
+                </header>
+                <Input placeholder={$slashDetail.placeholder} fullWidth bind:value={input} bind:input={focus}
+                       on:submit={() => {
+                           $slashSelection?.();
+                           $slashDetail.handler(input)
+                       }}/>
+                <footer>
+                    <Button tabindex="0" transparent small on:click={() => {
+                        input = ''
+                        $slashDetail = null
+                    }}>{i18n('cancel')}
+                    </Button>
+                    <Button tabindex="0" transparent small
+                            on:click={() => {
+                                $slashSelection?.();
+                                $slashDetail.handler(input);
+                            }}>{i18n('insert')}
+                    </Button>
+                </footer>
             </div>
         {:else}
             <div class="list">

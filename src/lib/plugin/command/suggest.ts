@@ -31,6 +31,11 @@ function fixRange(editor: Editor, range: any, split = '/') {
     return range
 }
 
+export function getDetail(editor, range, opt) {
+    slashSelection.set(() => editor.chain().focus().deleteRange(fixRange(editor, range)).run());
+    slashDetail.set(opt);
+}
+
 export const suggest = {
     pluginKey: new PluginKey('slash-suggest'),
     char: '/',
@@ -129,7 +134,10 @@ export const suggest = {
                         title: i18n('table'),
                         subtitle: i18n('tableInfo'),
                         command: ({editor, range}) => {
-                            editor.chain().focus().deleteRange(fixRange(editor, range)).insertTable({rows: 2, cols: 3}).run();
+                            editor.chain().focus().deleteRange(fixRange(editor, range)).insertTable({
+                                rows: 2,
+                                cols: 3
+                            }).run();
                         }
                     },
                     {
@@ -144,19 +152,24 @@ export const suggest = {
                         icon: 'iframe',
                         title: i18n('iframe'),
                         subtitle: i18n('iframeInfo'),
-                        command: ({editor, range}) => {
-                            slashSelection.set(() => editor.chain().focus().deleteRange(fixRange(editor, range)).run());
-                            slashDetail.set('iframe');
-                        }
+                        command: ({editor, range}) => getDetail(editor, range, {
+                            title: 'iframe', placeholder: 'url', handler: (input) => {
+                                editor.chain().focus().insertContent([{
+                                    type: 'iframe',
+                                    attrs: {src: input}
+                                }, {type: 'paragraph'}]).run()
+                            }
+                        })
                     },
                     {
                         icon: 'youtube_activity',
                         title: i18n('youtube'),
                         subtitle: i18n('youtubeInfo'),
-                        command: ({editor, range}) => {
-                            slashSelection.set(() => editor.chain().focus().deleteRange(fixRange(editor, range)).run());
-                            slashDetail.set('youtube');
-                        }
+                        command: ({editor, range}) => getDetail(editor, range, {
+                            title: 'youtube', placeholder: 'url', handler: (input) => {
+                                editor.chain().focus().insertVideoPlayer({url: input}).insertContent('\n').run();
+                            }
+                        })
                     }
                 ]
             }
