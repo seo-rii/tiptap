@@ -13,7 +13,7 @@
     import {fallbackUpload} from "$lib/plugin/image/dragdrop";
 
     const san = (body: string) => sanitizeHtml(body, {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'tiptap-file', 'lite-youtube', 'blockquote', 'embed']),
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'lite-youtube', 'blockquote', 'embed', ...allowedTags]),
         allowedStyles: <any>'*', allowedAttributes: {
             '*': ['style', 'class'],
             a: ['href', 'name', 'target'],
@@ -29,7 +29,8 @@
 
     export let body = '', editable = false, ref = null, options = {}, loaded = false
     export let imageUpload: UploadFn = fallbackUpload, style = ''
-    export let blocks = [], placeholder = i18n('placeholder')
+    export let blocks: any[] = [], placeholder = i18n('placeholder')
+    export let allowedTags: string[] = [];
     export let colors = [
         '#ef5350',//red
         '#ec407a',//pink
@@ -40,6 +41,7 @@
         '#3f51b5',//blue
         '#ab47bc',//purple
     ]
+
     const tiptap = setContext('editor', writable<any>(null))
     let element: Element, fullscreen = false, mounted = false, last = ''
 
