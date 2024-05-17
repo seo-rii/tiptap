@@ -12,25 +12,10 @@
     import type {UploadFn} from "$lib/plugin/image/dragdrop";
     import {fallbackUpload} from "$lib/plugin/image/dragdrop";
 
-    const san = (body: string) => sanitizeHtml(body, {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'lite-youtube', 'blockquote', 'embed', ...allowedTags]),
-        allowedStyles: <any>'*', allowedAttributes: {
-            '*': ['style', 'class'],
-            a: ['href', 'name', 'target'],
-            img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading'],
-            iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
-            th: ['colwidth', 'colspan', 'rowspan'],
-            td: ['colwidth', 'colspan', 'rowspan'],
-            'tiptap-file': ['id'],
-            'lite-youtube': ['videoid', 'params', 'nocookie', 'title', 'provider'],
-            embed: ['src', 'type', 'frameborder', 'allowfullscreen']
-        },
-    })
-
     export let body = '', editable = false, ref = null, options = {}, loaded = false
     export let imageUpload: UploadFn = fallbackUpload, style = ''
     export let blocks: any[] = [], placeholder = i18n('placeholder')
-    export let allowedTags: string[] = [];
+    export let allowedTags: string[] = [], allowedAttributes: any = {};
     export let colors = [
         '#ef5350',//red
         '#ec407a',//pink
@@ -41,6 +26,21 @@
         '#3f51b5',//blue
         '#ab47bc',//purple
     ]
+
+    const san = (body: string) => sanitizeHtml(body, {
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'lite-youtube', 'blockquote', 'embed', ...allowedTags]),
+        allowedStyles: <any>'*', allowedAttributes: {
+            '*': ['style', 'class'],
+            a: ['href', 'name', 'target'],
+            img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading'],
+            iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
+            th: ['colwidth', 'colspan', 'rowspan'],
+            td: ['colwidth', 'colspan', 'rowspan'],
+            'lite-youtube': ['videoid', 'params', 'nocookie', 'title', 'provider'],
+            embed: ['src', 'type', 'frameborder', 'allowfullscreen'],
+            ...allowedAttributes,
+        },
+    })
 
     const tiptap = setContext('editor', writable<any>(null))
     let element: Element, fullscreen = false, mounted = false, last = ''
