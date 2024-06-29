@@ -8,6 +8,7 @@
     import setMath from "$lib/tiptap/setMath";
     import {Button, Icon, IconButton, Input, List, OneLine, Tooltip} from "nunui";
     import i18n from "$lib/i18n";
+    import ColorPicker from "svelte-awesome-color-picker";
 
     export let colors = [];
     const tiptap = getContext<any>('editor')
@@ -99,8 +100,18 @@
                         <IconButton size="1.2em" icon="palette" slot="target"/>
                         <div style="font-size: 0.6em">
                             <List>
-                                <Button small outlined on:click={() => $tiptap.chain().focus().unsetColor().run()}>{i18n('default')}
+                                <Button small outlined on:click={() => $tiptap.chain().focus().unsetColor().run()}>
+                                    {i18n('default')}
                                 </Button>
+                                <Tooltip bottom left xstack stacked="2">
+                                    <Button small outlined on:click={() => $tiptap.chain().focus().unsetColor().run()}
+                                            slot="target">
+                                        <Icon colorize/>
+                                    </Button>
+                                    <ColorPicker isDialog={false} on:input={(event) => {
+                                        $tiptap.chain().focus().setColor(event.detail.hex).run()
+                                    }}/>
+                                </Tooltip>
                                 {#each colors as color}
                                     <Button small outlined
                                             on:click={() => $tiptap.chain().focus().setColor(color).run()}
