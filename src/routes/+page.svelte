@@ -11,7 +11,7 @@
 &lt;TipTap bind:ref bind:body {editable}/&gt;</code></pre><p>That's all!</p>`, editable = true;
 </script>
 
-<TipTap bind:body {editable}/>
+<TipTap bind:body {editable} mark/>
 <br>
 <Checkbox bind:checked={editable} label="editable"/>
 <br>
