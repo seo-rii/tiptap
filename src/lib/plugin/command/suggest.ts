@@ -116,9 +116,11 @@ export const suggest = {
                         icon: 'code',
                         title: i18n('codeBlock'),
                         subtitle: i18n('codeBlockInfo'),
-                        command: ({editor, range}) => {
-                            editor.chain().focus().deleteRange(fixRange(editor, range)).setNode('codeBlock').run();
-                        }
+                        command: ({editor, range}) => getDetail(editor, range, {
+                            type: 'code', handler: (input) => {
+                                editor.chain().focus().deleteRange(fixRange(editor, range - 1)).setNode('codeBlock', {language: input}).run();
+                            }
+                        })
                     },
                     {
                         icon: 'functions',

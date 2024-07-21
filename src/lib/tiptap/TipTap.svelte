@@ -26,9 +26,10 @@
 		'#3f51b5',//blue
 		'#ab47bc'//purple
 	];
+	export let bubbleOverride = false;
 
 	const san = (body: string) => sanitizeHtml(body, {
-		allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'lite-youtube', 'blockquote', 'embed', 'mark', ...allowedTags]),
+		allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'lite-youtube', 'blockquote', 'embed', 'mark', 'code', ...allowedTags]),
 		allowedStyles: <any>'*', allowedAttributes: {
 			'*': ['style', 'class'],
 			a: ['href', 'name', 'target'],
@@ -39,6 +40,7 @@
 			'lite-youtube': ['videoid', 'params', 'nocookie', 'title', 'provider'],
 			embed: ['src', 'type', 'frameborder', 'allowfullscreen'],
 			mark: ['style', 'data-color'],
+			code: ['class'],
 			...allowedAttributes
 		}
 	});
@@ -135,13 +137,10 @@
 		<Floating />
 	{/if}
 	{#if editable || mark}
-		{#if $$slots.bubble}
-			<Bubble {colors} {editable}>
-				<slot name="bubble" />
-			</Bubble>
-		{:else}
-			<Bubble {colors} {editable} />
-		{/if}
+		<Bubble {colors} {editable} override={bubbleOverride}>
+			<slot name="bubble" />
+			<slot name="bubbleOverride" slot="override" />
+		</Bubble>
 	{/if}
 </main>
 

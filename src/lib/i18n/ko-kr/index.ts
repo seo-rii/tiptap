@@ -12,6 +12,7 @@ export default {
     insert: '삽입',
     noResult: '결과 없음',
     default: '기본',
+    auto: '자동',
 
     title: '제목',
     paragraph: '본문',
@@ -45,4 +46,6 @@ export default {
 
     newLineInfo: '/로 명령어 입력. 또는',
     placeholder: '내용을 입력하세요...',
+
+    insertCode: '코드 삽입',
 }

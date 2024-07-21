@@ -1,105 +1,118 @@
 <script lang="ts">
-    import {Button, IconButton, Input, List, OneLine, TwoLine} from "nunui";
-    import {getContext} from "svelte";
-    import {
-        slashVisible,
-        slashItems,
-        slashLocaltion,
-        slashProps,
-        slashDetail,
-        slashSelection
-    } from '../plugin/command/stores';
-    import {fly, slide} from "svelte/transition";
-    import {quartOut} from "svelte/easing";
-    import i18n from "$lib/i18n";
+	import { Button, IconButton, Input, List, OneLine, TwoLine } from 'nunui';
+	import { getContext } from 'svelte';
+	import {
+		slashVisible,
+		slashItems,
+		slashLocaltion,
+		slashProps,
+		slashDetail,
+		slashSelection
+	} from '../plugin/command/stores';
+	import { fly, slide } from 'svelte/transition';
+	import { quartOut } from 'svelte/easing';
+	import i18n from '$lib/i18n';
 
-    const tiptap = getContext<any>('editor');
-    export let selectedIndex = 0;
+	const tiptap = getContext<any>('editor');
+	export let selectedIndex = 0;
 
-    let height = 0, elements = [];
-    let input = '', focus: any;
+	let height = 0, elements = [];
+	let input = '', focus: any;
 
-    $: if ($slashVisible) {
-        input = '';
-    }
-    $: setTimeout(() => focus?.focus?.(), 100);
+	$: if ($slashVisible) {
+		input = '';
+	}
+	$: setTimeout(() => focus?.focus?.(), 100);
 </script>
 
-<svelte:window bind:innerHeight={height}/>
+<svelte:window bind:innerHeight={height} />
 
 {#if $slashVisible}
-    <div class="scrim" on:click={() => $slashVisible = false}/>
-    <main style="left: {$slashLocaltion.x}px; top: {$slashLocaltion.y + $slashLocaltion.height + 384 > height
+	<div class="scrim" on:click={() => $slashVisible = false} />
+	<main style="left: {$slashLocaltion.x}px; top: {$slashLocaltion.y + $slashLocaltion.height + 384 > height
 			? $slashLocaltion.y - $slashLocaltion.height - 384
 			: $slashLocaltion.y + $slashLocaltion.height}px;" transition:fly={{y: 10, duration: 200, easing: quartOut}}>
-        {#if $slashDetail === 'emoji'}
-            <div class="list">
-                <List>
-                    {#each $slashItems as {title, command}, i(title)}
-                        <div transition:slide={{duration: 400, easing: quartOut}}>
-                            <OneLine on:click={() => {
+		{#if $slashDetail === 'emoji'}
+			<div class="list">
+				<List>
+					{#each $slashItems as { title, command }, i(title)}
+						<div transition:slide={{duration: 400, easing: quartOut}}>
+							<OneLine on:click={() => {
                                 command?.($slashProps);
                                 setTimeout(() => $tiptap.commands.focus());
-                            }} bind:this={elements[i]} {title} active={selectedIndex === i}/>
-                        </div>
-                    {/each}
-                    {#if !$slashItems.length}
-                        <div class="section"
-                             transition:slide={{duration: 400, easing: quartOut}}>{i18n('noResult')}</div>
-                    {/if}
-                </List>
-            </div>
-        {:else if $slashDetail}
-            <div class="detail">
-                <header>
-                    <IconButton icon="arrow_back" on:click={() => $slashDetail = null}/>
-                    <div class="title">{$slashDetail.title}</div>
-                </header>
-                <Input placeholder={$slashDetail.placeholder} fullWidth bind:value={input} bind:input={focus}
-                       on:submit={() => {
+                            }} bind:this={elements[i]} {title} active={selectedIndex === i} />
+						</div>
+					{/each}
+					{#if !$slashItems.length}
+						<div class="section"
+								 transition:slide={{duration: 400, easing: quartOut}}>{i18n('noResult')}</div>
+					{/if}
+				</List>
+			</div>
+		{:else if $slashDetail?.type === 'code'}
+			<div class="detail">
+				<header>
+					<IconButton icon="arrow_back" on:click={() => $slashDetail = null} />
+					<div class="title">{i18n('insertCode')}</div>
+				</header>
+				<div>
+					<Button small on:click={() => {$slashSelection?.();$slashDetail.handler(undefined);}}>{i18n('auto')}</Button>
+					{#each ['cpp', 'python', 'java'] as lang}
+						<Button small outlined on:click={() => {$slashSelection?.();$slashDetail.handler(lang);}}>{lang}</Button>
+					{/each}
+				</div>
+			</div>
+		{:else if $slashDetail}
+			<div class="detail">
+				<header>
+					<IconButton icon="arrow_back" on:click={() => $slashDetail = null} />
+					<div class="title">{$slashDetail.title}</div>
+				</header>
+				<Input placeholder={$slashDetail.placeholder} fullWidth bind:value={input} bind:input={focus}
+							 on:submit={() => {
                            $slashSelection?.();
                            $slashDetail.handler(input)
-                       }}/>
-                <footer>
-                    <Button tabindex="0" transparent small on:click={() => {
+                       }} />
+				<footer>
+					<Button tabindex="0" transparent small on:click={() => {
                         input = ''
                         $slashDetail = null
                     }}>{i18n('cancel')}
-                    </Button>
-                    <Button tabindex="0" transparent small
-                            on:click={() => {
+					</Button>
+					<Button tabindex="0" transparent small
+									on:click={() => {
                                 $slashSelection?.();
                                 $slashDetail.handler(input);
                             }}>{i18n('insert')}
-                    </Button>
-                </footer>
-            </div>
-        {:else}
-            <div class="list">
-                <List>
-                    {#each $slashItems as {section, list}, j(section)}
-                        {@const lastCount = $slashItems.slice(0, j).reduce((acc, cur) => acc + cur.list.length, 0)}
-                        <div class="section" transition:slide={{duration: 400, easing: quartOut}}>{section}</div>
-                        <div transition:slide={{duration: 400, easing: quartOut}}>
-                            {#each list || [] as {title, subtitle, icon, command, section}, i(title)}
-                                <div transition:slide={{duration: 400, easing: quartOut}}>
-                                    <TwoLine on:mouseenter={() => (selectedIndex = i + lastCount)} on:click={() => {
+					</Button>
+				</footer>
+			</div>
+		{:else}
+			<div class="list">
+				<List>
+					{#each $slashItems as { section, list }, j(section)}
+						{@const lastCount = $slashItems.slice(0, j).reduce((acc, cur) => acc + cur.list.length, 0)}
+						<div class="section" transition:slide={{duration: 400, easing: quartOut}}>{section}</div>
+						<div transition:slide={{duration: 400, easing: quartOut}}>
+							{#each list || [] as { title, subtitle, icon, command, section }, i(title)}
+								<div transition:slide={{duration: 400, easing: quartOut}}>
+									<TwoLine on:mouseenter={() => (selectedIndex = i + lastCount)} on:click={() => {
                                         command?.($slashProps);
                                         setTimeout(() => $tiptap.commands.focus());
                                     }} bind:this={elements[i + lastCount]} {icon} {title} subtitle={subtitle || ''}
-                                             active={selectedIndex === i + lastCount}/>
-                                </div>
-                            {/each}
-                        </div>
-                    {/each}
-                    {#if !$slashItems.length}
-                        <div class="section"
-                             transition:slide={{duration: 400, easing: quartOut}}>{i18n('noResult')}</div>
-                    {/if}
-                </List>
-            </div>
-        {/if}
-    </main>
+													 active={selectedIndex === i + lastCount} />
+								</div>
+							{/each}
+						</div>
+					{/each}
+					{#if !$slashItems.length}
+						<div class="section"
+								 transition:slide={{duration: 400, easing: quartOut}}>{i18n('noResult')}</div>
+					{/if}
+				</List>
+			</div>
+		{/if}
+	</main>
 {/if}
 
 <style lang="scss">

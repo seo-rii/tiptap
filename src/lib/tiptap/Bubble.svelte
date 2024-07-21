@@ -11,7 +11,7 @@
 	import ColorPicker from 'svelte-awesome-color-picker';
 	import { isTextSelection } from '@tiptap/core';
 
-	export let colors = [], editable;
+	export let colors = [], editable, override;
 	const tiptap = getContext<any>('editor');
 
 	let link = false, href = '', sel = '', _sel = '';
@@ -42,8 +42,10 @@
 {#if $tiptap}
 	<BubbleMenu editor={$tiptap} updateDelay={50} {shouldShow}
 							tippyOptions={{moveTransition: 'transform 0.2s cubic-bezier(1,.5,0,.85)', animation:'shift-away-subtle', duration: [200, 50]}}>
-		{#if $$slots.default}
-			<slot />
+		{#if override}
+			<main>
+				<slot name="override" />
+			</main>
 		{:else}
 			<main>
 				{#if link}
@@ -143,6 +145,7 @@
 						<ToolbarButton icon="link" prop="link" handler={() => link = true} />
 					{/if}
 				{/if}
+				<slot />
 			</main>
 		{/if}
 	</BubbleMenu>

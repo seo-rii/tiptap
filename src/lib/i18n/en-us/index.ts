@@ -12,6 +12,7 @@ export default {
     insert: 'Insert',
     noResult: 'No result',
     default: 'default',
+    auto: 'auto',
 
     title: 'Title',
     paragraph: 'Paragraph',
@@ -46,4 +47,6 @@ export default {
 
     newLineInfo: 'Press / to enter commands. Or',
     placeholder: 'Enter content here...',
+
+    insertCode: 'Insert code',
 }
