@@ -15,7 +15,7 @@
 	export let body = '', editable = false, mark = false, ref = null, options = {}, loaded = false;
 	export let imageUpload: UploadFn = fallbackUpload, style = '';
 	export let blocks: any[] = [], placeholder = i18n('placeholder');
-	export let allowedTags: string[] = [], allowedAttributes: any = {};
+	export let sanitize: any = {};
 	export let colors = [
 		'#ef5350',//red
 		'#ec407a',//pink
@@ -29,7 +29,8 @@
 	export let bubbleOverride = false;
 
 	const san = (body: string) => sanitizeHtml(body, {
-		allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'lite-youtube', 'blockquote', 'embed', 'mark', 'code', ...allowedTags]),
+		...sanitize,
+		allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'math-inline', 'math-node', 'iframe', 'lite-youtube', 'blockquote', 'embed', 'mark', 'code', ...sanitize.allowedTags]),
 		allowedStyles: <any>'*', allowedAttributes: {
 			'*': ['style', 'class'],
 			a: ['href', 'name', 'target'],
@@ -41,7 +42,7 @@
 			embed: ['src', 'type', 'frameborder', 'allowfullscreen'],
 			mark: ['style', 'data-color'],
 			code: ['class'],
-			...allowedAttributes
+			...sanitize.allowedAttributes
 		}
 	});
 
