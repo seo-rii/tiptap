@@ -1,6 +1,5 @@
 import {Editor, mergeAttributes} from "@tiptap/core";
 import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
-import {all, createLowlight} from 'lowlight';
 import Code from "@tiptap/extension-code";
 import Image from "$lib/plugin/image";
 import StarterKit from "@tiptap/starter-kit";
@@ -39,40 +38,17 @@ import kotlin from 'highlight.js/lib/languages/kotlin'
 import go from 'highlight.js/lib/languages/go'
 import csharp from 'highlight.js/lib/languages/csharp'
 import rust from 'highlight.js/lib/languages/rust'
+import { CodeBlockShiki } from '$lib/plugin/codeblock';
 
 export default (element: Element, content: string, {
     placeholder = i18n('placeholder'),
     plugins = [],
     ...props
 }: any = {}) => {
-    const lowlight = createLowlight(all)
-
-    lowlight.register('js', js)
-    lowlight.register('ts', ts)
-    lowlight.register('python', python)
-    lowlight.register('cpp', cpp)
-    lowlight.register('java', java)
-    lowlight.register('kotlin', kotlin)
-    lowlight.register('go', go)
-    lowlight.register('csharp', csharp)
-    lowlight.register('rust', rust)
-
     const tt = new Editor({
         element, content, ...props,
         extensions: [
-            CodeBlockLowlight.extend({
-                addKeyboardShortcuts() {
-                    return {
-                        ...this.parent?.(),
-                        'Tab': () => {
-                            if (this.editor.isActive('codeBlock')) {
-                                return this.editor.commands.insertContent('    ');
-                            }
-                            return true;
-                        }
-                    }
-                }
-            }).configure({lowlight}),
+            CodeBlockShiki,
             Image,
             Youtube,
             StarterKit,
