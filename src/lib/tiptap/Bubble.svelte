@@ -39,7 +39,7 @@
 		if (tiptap && sel !== _sel) {
 			_sel = sel;
 			link = false;
-			href = tiptap.getAttributes('link').href;
+			href = tiptap.getAttributes('link').href || '';
 		}
 	});
 
