@@ -6,52 +6,52 @@
 	import { isTableAnySelected } from '$lib/plugin/table/util';
 	import deleteTable from '$lib/plugin/table/deleteTable';
 	import setMath from '$lib/tiptap/setMath';
-	import { Button, Icon, IconButton, Input, List, OneLine, Paper } from 'nunui';
+	import { Button, Icon, IconButton, Input, List, OneLine, Paper, Render } from 'nunui';
 	import i18n from '$lib/i18n';
 	import ColorPicker from 'svelte-awesome-color-picker';
 	import { isTextSelection } from '@tiptap/core';
 
-	let { colors = [], editable, override } = $props();
+	let { colors = [], editable, override, children } = $props();
 
 	const editor = getContext<{ v: any }>('editor');
 	const tiptap = $derived(editor.v);
 
 	let selection = $state(null);
-    let table = $state(false);
-    let sel = $state('');
-    let _sel = $state('');
-    let link = $state(false);
-    let href = $state('');
+	let table = $state(false);
+	let sel = $state('');
+	let _sel = $state('');
+	let link = $state(false);
+	let href = $state('');
 
-    $effect(() => {
-        selection = tiptap?.state?.selection;
-    });
+	$effect(() => {
+		selection = tiptap?.state?.selection;
+	});
 
-    $effect(() => {
-        table = isTableAnySelected(selection);
-    });
+	$effect(() => {
+		table = isTableAnySelected(selection);
+	});
 
-    $effect(() => {
-        sel = selection?.from + '-' + selection?.to;
-    });
+	$effect(() => {
+		sel = selection?.from + '-' + selection?.to;
+	});
 
-    $effect(() => {
-        if (tiptap && sel !== _sel) {
-            _sel = sel;
-            link = false;
-            href = tiptap.getAttributes('link').href;
-        }
-    });
+	$effect(() => {
+		if (tiptap && sel !== _sel) {
+			_sel = sel;
+			link = false;
+			href = tiptap.getAttributes('link').href;
+		}
+	});
 
-    $effect(() => {
-        if (tiptap && link) {
-            if (href) {
-                tiptap.chain().setLink({ href }).run();
-            } else if (tiptap.getAttributes('link').href) {
-                tiptap.chain().unsetLink().run();
-            }
-        }
-    });
+	$effect(() => {
+		if (tiptap && link) {
+			if (href) {
+				tiptap.chain().setLink({ href }).run();
+			} else if (tiptap.getAttributes('link').href) {
+				tiptap.chain().unsetLink().run();
+			}
+		}
+	});
 
 	const shouldShow = ({ view, state, from, to }) => {
 		const { doc, selection } = state;
@@ -76,7 +76,7 @@
 	>
 		{#if override}
 			<main>
-				<slot name="override" />
+				<Render it={override} />
 			</main>
 		{:else}
 			<main>
@@ -219,7 +219,7 @@
 						<ToolbarButton icon="link" prop="link" handler={() => (link = true)} />
 					{/if}
 				{/if}
-				<slot />
+				<Render it={children} />
 			</main>
 		{/if}
 	</BubbleMenu>

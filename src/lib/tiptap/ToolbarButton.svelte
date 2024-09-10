@@ -1,6 +1,6 @@
 <script lang="ts">
     import {getContext} from "svelte";
-    import {Button, IconButton} from "nunui";
+    import {Button, IconButton, Render} from "nunui";
 
 	const editor = getContext<{ v: any }>('editor');
 	const tiptap = $derived(editor.v);
@@ -24,7 +24,7 @@
 {:else}
     <Button outlined={!isActive()} onclick={handler || toggle} small {...rest}>
         {label}
-        <slot/>
+        <Render it={children} />
     </Button>
 {/if}
 
