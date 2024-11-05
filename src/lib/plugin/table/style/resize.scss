@@ -1,28 +1,26 @@
 .ProseMirror {
-  table .column-resize-handle {
-    position: absolute;
-    top: 0;
-    right: -2px;
-    bottom: -2px;
-    width: 4px;
-    pointer-events: none;
-    background-color: var(--primary-light6);
-    opacity: 0;
+	table .column-resize-handle {
+		position: absolute;
+		top: 0;
+		right: -2px;
+		bottom: -2px;
+		width: 4px;
+		pointer-events: none;
+		background-color: var(--primary-light6);
+		opacity: 0;
 
-    .editable & {
-      opacity: 1;
-    }
-  }
+		.editable & {
+			opacity: 1;
+		}
+	}
 
-  &.resize-cursor {
-    pointer-events: none;
+	&.resize-cursor {
+		pointer-events: none;
 
-    .editable & {
-      pointer-events: initial;
-      cursor: ew-resize;
-      cursor: col-resize; /* stylelint-disable declaration-block-no-duplicate-properties */
-    }
-  }
+		.editable & {
+			pointer-events: initial;
+			cursor: ew-resize;
+			cursor: col-resize; /* stylelint-disable declaration-block-no-duplicate-properties */
+		}
+	}
 }
-
-

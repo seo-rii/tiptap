@@ -1,3 +1,3 @@
-import TipTap from "./TipTap.svelte";
+import TipTap from './TipTap.svelte';
 
 export default TipTap;

@@ -1,64 +1,75 @@
-import {mergeAttributes, Node} from '@tiptap/core'
+import { mergeAttributes, Node } from '@tiptap/core';
 
 export interface IframeOptions {
-    allowFullscreen: boolean,
-    HTMLAttributes: {
-        [key: string]: any
-    },
+	allowFullscreen: boolean;
+	HTMLAttributes: {
+		[key: string]: any;
+	};
 }
 
 declare module '@tiptap/core' {
-    interface Commands<ReturnType> {
-        iframe: {
-            setIframe: (options: { src: string }) => ReturnType,
-        }
-    }
+	interface Commands<ReturnType> {
+		iframe: {
+			setIframe: (options: { src: string }) => ReturnType;
+		};
+	}
 }
 
 export default Node.create<IframeOptions>({
-    name: 'iframe',
-    group: 'block',
-    atom: true,
+	name: 'iframe',
+	group: 'block',
+	atom: true,
 
-    addOptions() {
-        return {
-            allowFullscreen: true,
-            HTMLAttributes: {
-                class: 'iframe-wrapper',
-            },
-        }
-    },
+	addOptions() {
+		return {
+			allowFullscreen: true,
+			HTMLAttributes: {
+				class: 'iframe-wrapper'
+			}
+		};
+	},
 
-    addAttributes() {
-        return {
-            src: {default: null},
-            frameborder: {default: 0},
-            allowfullscreen: {
-                default: this.options.allowFullscreen,
-                parseHTML: () => this.options.allowFullscreen,
-            },
-        }
-    },
+	addAttributes() {
+		return {
+			src: { default: null },
+			frameborder: { default: 0 },
+			allowfullscreen: {
+				default: this.options.allowFullscreen,
+				parseHTML: () => this.options.allowFullscreen
+			}
+		};
+	},
 
-    parseHTML() {
-        return [{
-            tag: 'iframe',
-        }]
-    },
+	parseHTML() {
+		return [
+			{
+				tag: 'iframe'
+			}
+		];
+	},
 
-    renderHTML({HTMLAttributes}) {
-        return ['div', this.options.HTMLAttributes, ['iframe', mergeAttributes(HTMLAttributes, {credentialless: true, crossorigin: "anonymous"})]]
-    },
+	renderHTML({ HTMLAttributes }) {
+		return [
+			'div',
+			this.options.HTMLAttributes,
+			[
+				'iframe',
+				mergeAttributes(HTMLAttributes, { credentialless: true, crossorigin: 'anonymous' })
+			]
+		];
+	},
 
-    addCommands() {
-        return {
-            setIframe: (options: { src: string }) => ({tr, dispatch}) => {
-                const {selection} = tr
-                const node = this.type.create(options)
-                if (dispatch) tr.replaceRangeWith(selection.from, selection.to, node)
+	addCommands() {
+		return {
+			setIframe:
+				(options: { src: string }) =>
+				({ tr, dispatch }) => {
+					const { selection } = tr;
+					const node = this.type.create(options);
+					if (dispatch) tr.replaceRangeWith(selection.from, selection.to, node);
 
-                return true
-            },
-        }
-    },
-})
+					return true;
+				}
+		};
+	}
+});

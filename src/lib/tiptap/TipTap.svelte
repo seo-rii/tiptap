@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { onMount, onDestroy, setContext } from 'svelte';
+	import { onMount, onDestroy, setContext, untrack } from 'svelte';
 	import sanitizeHtml from 'sanitize-html';
 	import '@seorii/prosemirror-math/style.css';
 	import Bubble from '$lib/tiptap/Bubble.svelte';
@@ -14,17 +13,17 @@
 
 	type Props = {
 		body: string;
-		editable: boolean;
-		mark: boolean;
-		ref: any;
-		options: Record<string, any>;
-		loaded: boolean;
-		imageUpload: UploadFn;
-		style: string;
-		blocks: any[];
-		placeholder: string;
-		sanitize: Record<string, any>;
-		colors: string[];
+		editable?: boolean;
+		mark?: boolean;
+		ref?: any;
+		options?: Record<string, any>;
+		loaded?: boolean;
+		imageUpload?: UploadFn;
+		style?: string;
+		blocks?: any[];
+		placeholder?: string;
+		sanitize?: Record<string, any>;
+		colors?: string[];
 		bubble?: any;
 		preloader?: any;
 	};
@@ -33,9 +32,9 @@
 		body = $bindable(''),
 		editable = false,
 		mark = false,
-		ref = null,
+		ref = $bindable(null),
 		options = {},
-		loaded = false,
+		loaded = $bindable(false),
 		imageUpload = fallbackUpload,
 		style = '',
 		blocks = [],
@@ -98,45 +97,41 @@
 	});
 
 	$effect(() => {
-		if (browser) {
-			(window as any).__image_uploader = imageUpload;
-			(window as any).__tiptap_blocks = blocks;
-		}
+		(window as any).__image_uploader = imageUpload;
+		(window as any).__tiptap_blocks = blocks;
 	});
 
-	if (browser)
-		onMount(() => {
-			body = last = san(body);
-			mounted = true;
-			Promise.all([import('./tiptap'), import('@justinribeiro/lite-youtube')]).then(
-				([{ default: tt }]) => {
-					if (!mounted) return;
-					tiptap.v = ref = tt(element, body, {
-						placeholder,
-						editable,
-						onTransaction: () => (tiptap.v = ref = tiptap.v),
-						...options
-					});
-					tiptap.v.on('update', ({ editor: tiptap }: any) => {
-						let content = tiptap.getHTML(),
-							json = tiptap.getJSON().content;
-						if (
-							Array.isArray(json) &&
-							json.length === 1 &&
-							json[0].type === 'paragraph' &&
-							!json[0].hasOwnProperty('content')
-						)
-							content = null;
-						body = last = content;
-					});
-					loaded = true;
-				}
-			);
-		});
-
-	onDestroy(() => {
-		mounted = false;
-		tiptap.v?.destroy?.();
+	$effect(() => {
+		body = last = san(untrack(() => body));
+		mounted = true;
+		Promise.all([import('./tiptap'), import('@justinribeiro/lite-youtube')]).then(
+			([{ default: tt }]) => {
+				if (!mounted) return;
+				tiptap.v = ref = tt(element, body, {
+					placeholder,
+					editable,
+					onTransaction: () => (tiptap.v = ref = tiptap.v),
+					...options
+				});
+				tiptap.v.on('update', ({ editor: tiptap }: any) => {
+					let content = tiptap.getHTML(),
+						json = tiptap.getJSON().content;
+					if (
+						Array.isArray(json) &&
+						json.length === 1 &&
+						json[0].type === 'paragraph' &&
+						!json[0].hasOwnProperty('content')
+					)
+						content = null;
+					body = last = content;
+				});
+				loaded = true;
+			}
+		);
+		return () => {
+			mounted = false;
+			tiptap.v?.destroy?.();
+		};
 	});
 
 	$effect.pre(() => {
@@ -153,7 +148,7 @@
 	function handleKeydown(event: KeyboardEvent) {
 		if (!$slashVisible) return;
 		let count = $slashItems.length;
-		if ($slashItems[0]?.list) count = $slashItems.reduce((acc, item) => acc + item.list.length, 0);
+		if (($slashItems[0] as any)?.list) count = $slashItems.reduce((acc, item) => acc + (item as any).list.length, 0);
 		if (event.key === 'ArrowUp') {
 			event.preventDefault();
 			selectedIndex = (selectedIndex + count - 1) % count;
@@ -174,9 +169,9 @@
 		return false;
 	}
 
-	function selectItem(index) {
-		const item = $slashItems[0]?.list
-			? $slashItems.map((i) => i.list).flat()[index]
+	function selectItem(index: number) {
+		const item = ($slashItems[0] as any)?.list
+			? $slashItems.map((i: any) => i.list).flat()[index]
 			: $slashItems[index];
 		if (item) {
 			let range = $slashProps.range;

@@ -1,10 +1,8 @@
 <script lang="ts">
-    import {ThemeProvider} from "nunui";
-    import './layout.css'
+	import { ThemeProvider } from 'nunui';
+	import './layout.css';
 
-    let {
-        children
-    } = $props();
+	let { children } = $props();
 </script>
 
 <ThemeProvider {children} />

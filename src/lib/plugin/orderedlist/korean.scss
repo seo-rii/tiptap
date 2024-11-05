@@ -1,22 +1,21 @@
 @counter-style kors {
-  system: cyclic;
-  symbols: "ㄱ." "ㄴ." "ㄷ." "ㄹ." "ㅁ." "ㅂ." "ㅅ." "ㅇ." "ㅈ." "ㅊ." "ㅋ." "ㅌ." "ㅍ." "ㅎ.";
-  suffix: " ";
+	system: cyclic;
+	symbols: 'ㄱ.' 'ㄴ.' 'ㄷ.' 'ㄹ.' 'ㅁ.' 'ㅂ.' 'ㅅ.' 'ㅇ.' 'ㅈ.' 'ㅊ.' 'ㅋ.' 'ㅌ.' 'ㅍ.' 'ㅎ.';
+	suffix: ' ';
 }
 
 @counter-style korc {
-  system: cyclic;
-  symbols: "가." "나." "다." "라." "마." "바." "사." "아." "자." "차." "카." "타." "파." "하.";
-  suffix: " ";
+	system: cyclic;
+	symbols: '가.' '나.' '다.' '라.' '마.' '바.' '사.' '아.' '자.' '차.' '카.' '타.' '파.' '하.';
+	suffix: ' ';
 }
 
 .ProseMirror {
-  ol[type="kors"] {
-    list-style-type: kors;
-  }
+	ol[type='kors'] {
+		list-style-type: kors;
+	}
 
-  ol[type="korc"] {
-    list-style-type: korc;
-  }
+	ol[type='korc'] {
+		list-style-type: korc;
+	}
 }
-
