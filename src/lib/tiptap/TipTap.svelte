@@ -26,6 +26,7 @@
 		colors?: string[];
 		bubble?: any;
 		preloader?: any;
+		crossorigin?: 'anonymous' | 'use-credentials';
 	};
 
 	let {
@@ -51,7 +52,8 @@
 			'#ab47bc' //purple
 		],
 		bubble = null,
-		preloader
+		preloader,
+		crossorigin = 'anonymous',
 	}: Props = $props();
 
 	const san = (body: string) =>
@@ -111,6 +113,7 @@
 					placeholder,
 					editable,
 					onTransaction: () => (tiptap.v = ref = tiptap.v),
+					crossorigin,
 					...options
 				});
 				tiptap.v.on('update', ({ editor: tiptap }: any) => {

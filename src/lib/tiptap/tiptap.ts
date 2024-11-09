@@ -55,7 +55,7 @@ const lowlight = () => {
 	return lowlight;
 };
 
-const extensions = (placeholder, plugins) => [
+const extensions = (placeholder, plugins, crossorigin) => [
 	CodeBlockLowlight.extend({
 		addKeyboardShortcuts() {
 			return {
@@ -69,7 +69,7 @@ const extensions = (placeholder, plugins) => [
 			};
 		}
 	}).configure({ lowlight: lowlight() }),
-	Image,
+	Image(crossorigin),
 	Youtube,
 	StarterKit,
 	Underline,
@@ -113,13 +113,13 @@ const extensions = (placeholder, plugins) => [
 export default (
 	element: Element,
 	content: string,
-	{ placeholder = i18n('placeholder'), plugins = [], ...props }: any = {}
+	{ placeholder = i18n('placeholder'), plugins = [], crossorigin, ...props }: any = {}
 ) => {
 	const tt = new Editor({
 		element,
 		content,
 		...props,
-		extensions: extensions(placeholder, plugins)
+		extensions: extensions(placeholder, plugins, crossorigin)
 	});
 	tt.registerPlugin(emoji(tt));
 	tt.registerPlugin(command(tt));

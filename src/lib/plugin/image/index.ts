@@ -2,7 +2,7 @@ import Image from '@tiptap/extension-image';
 import { mergeAttributes } from '@tiptap/core';
 import { dropImagePlugin } from '$lib/plugin/image/dragdrop';
 
-export default Image.extend({
+export default (crossorigin = 'anonymous') => Image.extend({
 	addOptions() {
 		return {
 			...this.parent?.(),
@@ -21,4 +21,4 @@ export default Image.extend({
 	addProseMirrorPlugins() {
 		return [dropImagePlugin()];
 	}
-}).configure({ HTMLAttributes: { crossorigin: 'anonymous' } });
+}).configure({ HTMLAttributes: { crossorigin } });
