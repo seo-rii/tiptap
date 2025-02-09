@@ -104,12 +104,14 @@
 	});
 
 	$effect(() => {
-		body = last = san(untrack(() => body));
+		const r = untrack(() => san(body));
+		body = r;
+		last = r;
 		mounted = true;
 		Promise.all([import('./tiptap'), import('@justinribeiro/lite-youtube')]).then(
 			([{ default: tt }]) => {
-				if (!mounted) return;
-				tiptap.v = ref = tt(element, body, {
+				if (!untrack(() => mounted)) return;
+				tiptap.v = ref = tt(element, r, {
 					placeholder,
 					editable,
 					onTransaction: () => (tiptap.v = ref = tiptap.v),
@@ -133,13 +135,15 @@
 		);
 		return () => {
 			mounted = false;
-			tiptap.v?.destroy?.();
+			untrack(() => tiptap.v?.destroy?.());
 		};
 	});
 
 	$effect.pre(() => {
 		if (last === body) return;
-		body = san(body);
+		const r = san(body);
+		body = r;
+		last = r;
 		tiptap.v?.commands?.setContent?.(body);
 	});
 
