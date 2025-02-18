@@ -30,7 +30,7 @@
 	};
 
 	let {
-		body = $bindable(''),
+		body = $bindable<string>(),
 		editable = false,
 		mark = false,
 		ref = $bindable(null),
@@ -57,7 +57,7 @@
 	}: Props = $props();
 
 	const san = (body: string) =>
-		sanitizeHtml(body, {
+		sanitizeHtml(body || '', {
 			...(sanitize || {}),
 			allowedTags: sanitizeHtml.defaults.allowedTags.concat([
 				'img',
