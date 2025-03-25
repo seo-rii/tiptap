@@ -173,45 +173,48 @@
 					{#if editable}
 						<ToolbarButton icon="functions" handler={() => setMath(tiptap)} />
 					{/if}
-					<Paper bl hover>
+					<Paper bl block>
 						{#snippet target()}
 							<IconButton size="1.2em" icon="palette" />
 						{/snippet}
 						<div style="font-size: 0.6em">
-							<List>
+							<div class="colors">
 								<Button small outlined onclick={() => tiptap.chain().focus().unsetColor().run()}>
 									{i18n('default')}
 								</Button>
-								<Paper bl hover>
+								<Paper bl remap block>
 									{#snippet target()}
 										<Button
 											small
+											full
 											outlined
 											onclick={() => tiptap.chain().focus().unsetColor().run()}
 										>
 											<Icon colorize />
 										</Button>
 									{/snippet}
-									<ColorPicker
-										isDialog={false}
-										oninput={(event) => {
-											tiptap.chain().focus().setColor(event.detail.hex).run();
-										}}
-									/>
+									<div onclick={(event) => event.stopPropagation()} onmousedown={(event) => event.stopPropagation()}>
+										<ColorPicker
+											isDialog={false}
+											onInput={(event) => {
+												tiptap.chain().focus().setColor(event.hex).run();
+											}}
+										/>
+									</div>
 								</Paper>
 								{#each colors as color}
 									<Button
 										small
 										outlined
 										onclick={() => tiptap.chain().focus().setColor(color).run()}
-										style="margin-right:4px"
 									>
 										<span
-											style="width: 20px; height: 16px; background: {color}; border-radius: 4px;display: inline-block;margin-bottom: -2px"
+										style:background={color}
+										class="pal"
 										></span>
 									</Button>
 								{/each}
-							</List>
+							</div>
 						</div>
 					</Paper>
 					{#if editable}
@@ -264,5 +267,23 @@
 			display: flex;
 			justify-content: flex-end;
 		}
+	}
+
+	.colors {
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
+		gap: 4px;
+
+		& > :global(:first-child) {
+			grid-column: 1/3;
+		}
+	}
+
+	.pal {
+		width: 20px; 
+		height: 16px; 
+		border-radius: 4px;
+		display: inline-block;
+		margin-bottom: -2px;
 	}
 </style>
