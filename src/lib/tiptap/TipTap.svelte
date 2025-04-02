@@ -87,7 +87,7 @@
 			}
 		});
 
-	const tiptap = $state({ v: null as any });
+	const tiptap = $state({ v: null as any, c: 0 });
 	setContext('editor', tiptap);
 	let element: Element,
 		fullscreen = $state(false),
@@ -114,7 +114,10 @@
 				tiptap.v = ref = tt(element, r, {
 					placeholder,
 					editable,
-					onTransaction: () => (tiptap.v = ref = tiptap.v),
+					onTransaction: () => {
+						tiptap.v = ref = tiptap.v;
+						tiptap.c++;
+					},
 					crossorigin,
 					...options
 				});

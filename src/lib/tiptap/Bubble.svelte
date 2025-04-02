@@ -13,7 +13,7 @@
 
 	let { colors = [], editable, override, children } = $props();
 
-	const editor = getContext<{ v: any }>('editor');
+	const editor = getContext<{ v: any; c: number }>('editor');
 	const tiptap = $derived(editor.v);
 
 	let selection = $state(null);
@@ -24,6 +24,7 @@
 	let href = $state('');
 
 	$effect(() => {
+		let _ = editor.c;
 		selection = tiptap?.state?.selection;
 	});
 
