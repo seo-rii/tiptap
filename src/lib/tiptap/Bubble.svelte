@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { BubbleMenu } from 'svelte-tiptap';
-	import { getContext, tick } from 'svelte';
+	import { flushSync, getContext, tick, untrack } from 'svelte';
 	import 'tippy.js/animations/shift-away-subtle.css';
 	import ToolbarButton from '$lib/tiptap/ToolbarButton.svelte';
 	import { isTableAnySelected } from '$lib/plugin/table/util';
@@ -25,6 +25,7 @@
 
 	$effect(() => {
 		let _ = editor.c;
+		flushSync();
 		selection = tiptap?.state?.selection;
 	});
 
@@ -45,13 +46,16 @@
 	});
 
 	$effect(() => {
-		if (tiptap && link) {
-			if (href) {
-				tiptap.chain().setLink({ href }).run();
-			} else if (tiptap.getAttributes('link').href) {
-				tiptap.chain().unsetLink().run();
+		const _href = href;
+		untrack(() => {
+			if (tiptap && link) {
+				if (href) {
+					tiptap.chain().setLink({ href: _href }).run();
+				} else if (tiptap.getAttributes('link').href) {
+					tiptap.chain().unsetLink().run();
+				}
 			}
-		}
+		})
 	});
 
 	const shouldShow = ({ view, state, from, to }) => {
@@ -87,7 +91,7 @@
 							<Icon icon="link" />
 							{i18n('link')}
 						</p>
-						<Input placeholder="url" fullWidth bind:value={href} autofocus />
+						<Input placeholder="url" bind:value={href} autofocus />
 						<div>
 							<Button
 								tabindex="0"
