@@ -53,7 +53,7 @@
 		],
 		bubble = null,
 		preloader,
-		crossorigin = 'anonymous',
+		crossorigin = 'anonymous'
 	}: Props = $props();
 
 	const san = (body: string) =>
@@ -158,7 +158,8 @@
 	function handleKeydown(event: KeyboardEvent) {
 		if (!$slashVisible) return;
 		let count = $slashItems.length;
-		if (($slashItems[0] as any)?.list) count = $slashItems.reduce((acc, item) => acc + (item as any).list.length, 0);
+		if (($slashItems[0] as any)?.list)
+			count = $slashItems.reduce((acc, item) => acc + (item as any).list.length, 0);
 		if (event.key === 'ArrowUp') {
 			event.preventDefault();
 			selectedIndex = (selectedIndex + count - 1) % count;
@@ -221,7 +222,8 @@
 	main {
 		position: relative;
 		overscroll-behavior: none;
-		--shadow: 0 1px 2px rgba(127, 127, 127, 0.07), 0 2px 4px rgba(127, 127, 127, 0.07),
+		--shadow:
+			0 1px 2px rgba(127, 127, 127, 0.07), 0 2px 4px rgba(127, 127, 127, 0.07),
 			0 4px 8px rgba(127, 127, 127, 0.07), 0 8px 16px rgba(127, 127, 127, 0.07),
 			0 16px 32px rgba(127, 127, 127, 0.07), 0 32px 64px rgba(127, 127, 127, 0.07);
 		&.fullscreen {

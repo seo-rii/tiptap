@@ -55,7 +55,7 @@
 					tiptap.chain().unsetLink().run();
 				}
 			}
-		})
+		});
 	});
 
 	const shouldShow = ({ view, state, from, to }) => {
@@ -198,7 +198,10 @@
 											<Icon colorize />
 										</Button>
 									{/snippet}
-									<div onclick={(event) => event.stopPropagation()} onmousedown={(event) => event.stopPropagation()}>
+									<div
+										onclick={(event) => event.stopPropagation()}
+										onmousedown={(event) => event.stopPropagation()}
+									>
 										<ColorPicker
 											isDialog={false}
 											onInput={(event) => {
@@ -213,10 +216,7 @@
 										outlined
 										onclick={() => tiptap.chain().focus().setColor(color).run()}
 									>
-										<span
-										style:background={color}
-										class="pal"
-										></span>
+										<span style:background={color} class="pal"></span>
 									</Button>
 								{/each}
 							</div>
