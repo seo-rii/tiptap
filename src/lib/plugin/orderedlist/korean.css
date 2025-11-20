@@ -11,11 +11,11 @@
 }
 
 .ProseMirror {
-	ol[type='kors'] {
+	& ol[type='kors'] {
 		list-style-type: kors;
 	}
 
-	ol[type='korc'] {
+	& ol[type='korc'] {
 		list-style-type: korc;
 	}
 }

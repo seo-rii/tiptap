@@ -1,5 +1,5 @@
 .ProseMirror {
-	.tableWrapper {
+	& .tableWrapper {
 		position: relative;
 		margin-top: 0.75em;
 		scrollbar-width: thin;
@@ -7,7 +7,7 @@
 		transition: all 0.1s ease-in-out;
 	}
 
-	.scrollable {
+	& .scrollable {
 		padding-left: 1em;
 		margin-left: -1em;
 		overflow: auto hidden;
@@ -16,7 +16,7 @@
 		transition: border 250ms ease-in-out 0s;
 	}
 
-	.scrollable-shadow {
+	& .scrollable-shadow {
 		position: absolute;
 		top: 0;
 		bottom: 0;
@@ -52,17 +52,17 @@
 		}
 	}
 
-	table {
+	& table {
 		margin-top: 1em;
 		border-radius: 4px;
 		border-collapse: collapse;
 		box-sizing: border-box;
 		width: 100% !important;
 
-		h1,
-		h2,
-		h3,
-		p {
+		& h1,
+		& h2,
+		& h3,
+		& p {
 			margin: 0;
 		}
 
@@ -72,15 +72,13 @@
 	}
 }
 
-.editable {
-	.ProseMirror {
-		.tableWrapper {
-			padding: 10px;
-		}
+.editable .ProseMirror {
+	& .tableWrapper {
+		padding: 10px;
+	}
 
-		.selectedCell {
-			border-style: double;
-			background: var(--primary-light3);
-		}
+	& .selectedCell {
+		border-style: double;
+		background: var(--primary-light3);
 	}
 }

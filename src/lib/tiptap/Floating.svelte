@@ -68,7 +68,7 @@
 	</FloatingMenu>
 {/if}
 
-<style lang="scss">
+<style>
 	span {
 		opacity: 0.6;
 	}

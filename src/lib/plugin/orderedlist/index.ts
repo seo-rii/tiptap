@@ -2,7 +2,7 @@ import { wrappingInputRule } from '@tiptap/core';
 import OrderedListBase from '@tiptap/extension-ordered-list';
 import toggleList from './toggleList';
 
-import './korean.scss';
+import './korean.css';
 
 export default OrderedListBase.extend({
 	priority: 20,

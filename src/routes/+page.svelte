@@ -18,15 +18,13 @@
 <br />
 <Input placeholder="html" multiline bind:value={body} />
 
-<style lang="scss">
+<style>
 	@import 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css';
 
-	:global {
-		blockquote {
-			border-left: 3px solid var(--primary-light8);
-			margin: 0;
-			padding-left: 10px;
-			color: var(--primary-dark8);
-		}
+	:global(blockquote) {
+		border-left: 3px solid var(--primary-light8);
+		margin: 0;
+		padding-left: 10px;
+		color: var(--primary-dark8);
 	}
 </style>

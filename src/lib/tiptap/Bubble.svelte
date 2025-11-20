@@ -233,7 +233,7 @@
 	</BubbleMenu>
 {/if}
 
-<style lang="scss">
+<style>
 	main {
 		box-shadow: var(--shadow);
 		background: var(--surface, #fff);
@@ -244,17 +244,16 @@
 		align-items: center;
 		justify-content: center;
 		font-size: 1.2em;
-
 		& > :global(*) {
 			margin: 0 2px;
+		}
 
-			&:first-child {
-				margin-left: 0;
-			}
+		& > :global(*:first-child) {
+			margin-left: 0;
+		}
 
-			&:last-child {
-				margin-right: 0;
-			}
+		& > :global(*:last-child) {
+			margin-right: 0;
 		}
 	}
 
@@ -263,11 +262,11 @@
 		flex-direction: column;
 		font-size: 0.7em;
 
-		p {
+		& p {
 			margin: 0 0 0.6em 0;
 		}
 
-		div {
+		& div {
 			margin-top: 0.6em;
 			display: flex;
 			justify-content: flex-end;
@@ -285,8 +284,8 @@
 	}
 
 	.pal {
-		width: 20px; 
-		height: 16px; 
+		width: 20px;
+		height: 16px;
 		border-radius: 4px;
 		display: inline-block;
 		margin-bottom: -2px;

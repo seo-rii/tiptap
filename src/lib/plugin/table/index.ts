@@ -4,7 +4,7 @@ import { tableEditing, columnResizing } from 'prosemirror-tables';
 import { Decoration, DecorationSet } from 'prosemirror-view';
 import deleteTable from './deleteTable';
 
-import './style.scss';
+import './style.css';
 
 export default BuiltInTable.extend({
 	renderHTML() {

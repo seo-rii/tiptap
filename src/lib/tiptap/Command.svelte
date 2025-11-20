@@ -170,7 +170,7 @@
 	</main>
 {/if}
 
-<style lang="scss">
+<style>
 	.scrim {
 		position: fixed;
 		top: 0;
@@ -203,18 +203,16 @@
 	.list {
 		color: var(--primary-dark7);
 
-		:global {
-			.title {
-				font-size: 0.7em !important;
-				font-weight: 300 !important;
-				margin-bottom: 4px;
-			}
+		& :global(.title) {
+			font-size: 0.7em !important;
+			font-weight: 300 !important;
+			margin-bottom: 4px;
+		}
 
-			.subtitle {
-				font-size: 0.8em !important;
-				font-weight: 300 !important;
-				color: var(--primary-dark1);
-			}
+		& :global(.subtitle) {
+			font-size: 0.8em !important;
+			font-weight: 300 !important;
+			color: var(--primary-dark1);
 		}
 	}
 

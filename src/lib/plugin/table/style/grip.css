@@ -1,19 +1,16 @@
-$grip-margin: 3px;
-
 .ProseMirror table {
-	.grip-column {
+	& .grip-column {
 		position: absolute;
 		top: -0.7em;
 		left: 0;
 		z-index: 10;
 		display: block;
-		width: calc(100% - 2 * #{$grip-margin});
+		width: calc(100% - 6px);
 		height: 0.4em;
-		margin: 0 $grip-margin 3px $grip-margin;
+		margin: 0 3px 3px 3px;
 		background: var(--primary-light3);
 		opacity: 0;
 		border-radius: 10px;
-
 		transition: all 0.1s ease-in-out;
 
 		&:hover,
@@ -22,19 +19,18 @@ $grip-margin: 3px;
 		}
 	}
 
-	.grip-row {
+	& .grip-row {
 		position: absolute;
 		top: 0;
 		left: -0.7em;
 		z-index: 10;
 		display: block;
 		width: 0.4em;
-		height: calc(100% - 2 * #{$grip-margin});
-		margin: $grip-margin 3px $grip-margin 0;
+		height: calc(100% - 6px);
+		margin: 3px 3px 3px 0;
 		background: var(--primary-light3);
 		opacity: 0;
 		border-radius: 10px;
-
 		transition: all 0.1s ease-in-out;
 
 		&:hover,
@@ -43,7 +39,7 @@ $grip-margin: 3px;
 		}
 	}
 
-	.grip-table {
+	& .grip-table {
 		position: absolute;
 		top: -0.8em;
 		left: -0.8em;
@@ -54,7 +50,6 @@ $grip-margin: 3px;
 		background: var(--primary-light3);
 		border-radius: 50%;
 		opacity: 0;
-
 		transition: all 0.1s ease-in-out;
 
 		&:hover,
@@ -62,13 +57,13 @@ $grip-margin: 3px;
 			background: var(--primary-light6);
 		}
 	}
+}
 
-	.editable & {
-		.grip-column,
-		.grip-row,
-		.grip-table {
-			opacity: 1;
-			cursor: pointer;
-		}
+.editable .ProseMirror table {
+	& .grip-column,
+	& .grip-row,
+	& .grip-table {
+		opacity: 1;
+		cursor: pointer;
 	}
 }

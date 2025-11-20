@@ -1,6 +1,6 @@
 .ProseMirror table {
-	td,
-	th {
+	& td,
+	& th {
 		position: relative;
 		min-width: 8px;
 		padding: 4px 8px;
@@ -9,9 +9,10 @@
 		border: 1px solid var(--primary-light3) !important;
 		transition: all 0.1s ease-in-out;
 		font-weight: normal;
+	}
 
-		> * {
-			margin-bottom: 0;
-		}
+	& td > *,
+	& th > * {
+		margin-bottom: 0;
 	}
 }

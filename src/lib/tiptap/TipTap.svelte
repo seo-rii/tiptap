@@ -217,14 +217,13 @@
 	{/if}
 </main>
 
-<style lang="scss">
+<style>
 	main {
 		position: relative;
 		overscroll-behavior: none;
 		--shadow: 0 1px 2px rgba(127, 127, 127, 0.07), 0 2px 4px rgba(127, 127, 127, 0.07),
 			0 4px 8px rgba(127, 127, 127, 0.07), 0 8px 16px rgba(127, 127, 127, 0.07),
 			0 16px 32px rgba(127, 127, 127, 0.07), 0 32px 64px rgba(127, 127, 127, 0.07);
-
 		&.fullscreen {
 			z-index: 999999999;
 			position: fixed;
@@ -236,19 +235,17 @@
 			padding: 82px 12px 12px 12px;
 		}
 
-		.wrapper {
+		& .wrapper {
 			position: relative;
 		}
 	}
 
-	.target > :global(div) {
-		& > :global(*:first-child) {
-			margin-top: 0 !important;
-		}
+	.target > :global(div) > :global(*:first-child) {
+		margin-top: 0 !important;
+	}
 
-		& > :global(*:last-child) {
-			margin-bottom: 0 !important;
-		}
+	.target > :global(div) > :global(*:last-child) {
+		margin-bottom: 0 !important;
 	}
 
 	.editable :global(.ProseMirror-selectednode img) {
@@ -266,8 +263,7 @@
 
 	div > :global(div) {
 		outline: none !important;
-
-		:global(.ProseMirror) :global(p.is-editor-empty:first-child::before) {
+		& :global(.ProseMirror) :global(p.is-editor-empty:first-child::before) {
 			color: var(--on-surface, #000);
 			opacity: 0.7;
 			content: attr(data-placeholder);
@@ -277,35 +273,35 @@
 			transition: 0.2s opacity ease-in-out;
 		}
 
-		:global(.ProseMirror-focused) :global(p.is-editor-empty:first-child::before) {
+		& :global(.ProseMirror-focused) :global(p.is-editor-empty:first-child::before) {
 			opacity: 0;
 		}
 
-		:global(a) {
+		& :global(a) {
 			cursor: pointer;
 		}
 
-		:global(img) {
+		& :global(img) {
 			transition: all 0.2s ease-in-out;
 			max-width: 100%;
 			border-radius: 12px;
 			position: relative;
 		}
 
-		:global(code.inline) {
+		& :global(code.inline) {
 			background: var(--primary-light1);
 			padding: 2px 4px;
 			border-radius: 4px;
 		}
 
-		:global(pre) {
+		& :global(pre) {
 			background: var(--primary-light1);
 			padding: 12px;
 			border-radius: 12px;
 			max-width: 100%;
 		}
 
-		:global(table) {
+		& :global(table) {
 			border-collapse: collapse;
 			width: 100%;
 			margin: 8px 0;
@@ -313,21 +309,21 @@
 			border-radius: 12px;
 		}
 
-		:global(th),
-		:global(td) {
+		& :global(th),
+		& :global(td) {
 			padding: 8px;
 			border: 1px solid var(--primary-light1);
 		}
 
-		:global(.math-render) {
+		& :global(.math-render) {
 			cursor: initial;
 		}
 
-		:global(lite-youtube) {
+		& :global(lite-youtube) {
 			border-radius: 12px;
 		}
 
-		:global(.iframe-wrapper) {
+		& :global(.iframe-wrapper) {
 			position: relative;
 			padding-bottom: 12px;
 			overflow: hidden;
@@ -336,7 +332,7 @@
 			border-radius: 12px;
 		}
 
-		:global(iframe) {
+		& :global(iframe) {
 			position: absolute;
 			top: 0;
 			left: 0;
