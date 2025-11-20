@@ -18,7 +18,7 @@ import Superscript from '@tiptap/extension-superscript';
 import Subscript from '@tiptap/extension-subscript';
 import { Indent } from '$lib/plugin/indent';
 import { Color } from '@tiptap/extension-color';
-import TextStyle from '@tiptap/extension-text-style';
+import { TextStyle } from '@tiptap/extension-text-style';
 import Iframe from '$lib/plugin/iframe';
 import Embed from '$lib/plugin/embed';
 // @ts-ignore

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy, setContext, untrack } from 'svelte';
+	import { setContext, untrack } from 'svelte';
 	import sanitizeHtml from 'sanitize-html';
 	import '@seorii/prosemirror-math/style.css';
 	import Bubble from '$lib/tiptap/Bubble.svelte';

@@ -11,8 +11,8 @@
 		label = '',
 		icon = '',
 		methodName = 'toggle' + prop.charAt(0).toUpperCase() + prop.slice(1),
-		tooltip,
-		handler,
+		tooltip = null,
+		handler = null,
 		...rest
 	} = $props();
 

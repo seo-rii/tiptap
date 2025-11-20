@@ -34,7 +34,7 @@
 <svelte:window bind:innerHeight={height} />
 
 {#if $slashVisible}
-	<div class="scrim" onclick={() => ($slashVisible = false)} />
+	<div class="scrim" onclick={() => ($slashVisible = false)}></div>
 	<main
 		style="left: {$slashLocaltion.x}px; top: {$slashLocaltion.y + $slashLocaltion.height + 384 >
 		height

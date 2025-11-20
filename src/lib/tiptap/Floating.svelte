@@ -78,6 +78,8 @@
 		flex-wrap: wrap;
 		width: max-content;
 		align-items: center;
+		position: relative;
+		top: -8px;
 
 		& > :global(*) {
 			margin-right: 4px;

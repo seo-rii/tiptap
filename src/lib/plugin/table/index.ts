@@ -1,4 +1,4 @@
-import BuiltInTable from '@tiptap/extension-table';
+import { Table as BuiltInTable } from '@tiptap/extension-table';
 import { Plugin } from 'prosemirror-state';
 import { tableEditing, columnResizing } from 'prosemirror-tables';
 import { Decoration, DecorationSet } from 'prosemirror-view';
