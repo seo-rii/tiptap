@@ -1,4 +1,4 @@
-import { slashVisible, slashItems, slashLocaltion, slashProps, slashDetail } from './stores';
+import { slashVisible, slashItems, slashLocation, slashProps, slashDetail } from './stores';
 import { PluginKey } from '@tiptap/pm/state';
 import Suggestion, {
 	type SuggestionKeyDownProps,
@@ -8,36 +8,40 @@ import Suggestion, {
 import type { Editor, Range } from '@tiptap/core';
 import type { SlashItem } from './stores';
 
-//@ts-ignore
+// @ts-ignore
 import emojis from 'emojis-list';
-//@ts-ignore
+// @ts-ignore
 import tags from 'emojis-keywords';
 
 const max = 10;
 
-function fixRange(editor: Editor, range: any, split = '/') {
-	const { state } = editor.view,
-		{ selection, doc } = state;
+function fixRange(editor: Editor, rawRange: Range, split = '/'): Range {
+	const range = { ...rawRange };
+	const { state } = editor.view;
+	const { selection, doc } = state;
+
 	if (selection.$to.nodeBefore?.text?.includes?.(split)) {
 		range.from = range.to;
 		while (range.from > 0 && doc.textBetween(range.from - 1, range.from) !== split) {
 			try {
 				range.from -= 1;
-			} catch (e) {
+			} catch {
 				range.from += 2;
 				break;
 			}
 		}
 		range.from -= 1;
 	}
+
 	while (range.to < selection.to && doc.textBetween(range.to, range.to + 1) !== ' ') {
 		try {
 			range.to += 1;
-		} catch (e) {
+		} catch {
 			range.to -= 1;
 			break;
 		}
 	}
+
 	return range;
 }
 
@@ -45,36 +49,42 @@ export const emoji: Omit<SuggestionOptions<SlashItem>, 'editor'> = {
 	pluginKey: new PluginKey('slash-emoji'),
 	char: ':',
 	items: ({ query }) => {
-		query = ':' + query.toLowerCase();
-		const filtered = [];
+		const normalizedQuery = `:${query.toLowerCase()}`;
+		const filtered: SlashItem[] = [];
+
 		for (let i = 0; i < emojis.length; i++) {
-			if (tags[i]?.includes?.(query))
+			if (tags[i]?.includes?.(normalizedQuery)) {
+				const emojiValue = emojis[i];
 				filtered.push({
-					title: emojis[i] + '  ' + tags[i],
+					title: `${emojiValue}  ${tags[i]}`,
 					command: ({ editor, range }) => {
 						editor
 							.chain()
 							.deleteRange(fixRange(editor, range, ':'))
-							.insertContent(emojis[i] + ' ')
+							.insertContent(`${emojiValue} `)
 							.run();
 					}
 				});
+			}
 			if (filtered.length >= max) break;
 		}
+
 		return filtered;
 	},
 
 	render: () => {
 		return {
-			onStart: (props) => {
-				let editor = props.editor;
-				let range = props.range;
-				let location = props.clientRect();
+			onStart: (props: SuggestionProps<SlashItem>) => {
+				const { editor, range } = props;
 				slashProps.set({ editor, range });
 				slashVisible.set(true);
-				slashLocaltion.set({ x: location.x, y: location.y, height: location.height });
 				slashItems.set(props.items);
 				slashDetail.set('emoji');
+
+				const location = props.clientRect?.();
+				if (location) {
+					slashLocation.set({ x: location.x, y: location.y, height: location.height });
+				}
 			},
 
 			onUpdate(props: SuggestionProps<SlashItem>) {

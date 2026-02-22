@@ -1,7 +1,7 @@
 import {
 	slashVisible,
 	slashItems,
-	slashLocaltion,
+	slashLocation,
 	slashProps,
 	slashDetail,
 	slashSelection
@@ -16,51 +16,69 @@ import Suggestion, {
 	type SuggestionOptions,
 	type SuggestionProps
 } from '@tiptap/suggestion';
-import type { SlashGroup } from './stores';
+import type { SlashDetail, SlashGroup, SlashItem } from './stores';
+
+type WindowWithTipTapGlobals = Window &
+	typeof globalThis & {
+		__tiptap_blocks?: SlashItem[];
+		__image_uploader?: UploadFn;
+	};
+
+type DetailInput = Exclude<SlashDetail, null | 'emoji'>;
 
 function fixRange(editor: Editor, rawRange: Range, split = '/'): Range {
 	const range = { ...rawRange };
 	const { state } = editor.view;
 	const { selection, doc } = state;
+
 	if (selection.$to.nodeBefore?.text?.includes?.(split)) {
 		range.from = range.to;
 		while (range.from > 0 && doc.textBetween(range.from - 1, range.from) !== split) {
 			try {
 				range.from -= 1;
-			} catch (e) {
+			} catch {
 				range.from += 2;
 				break;
 			}
 		}
 		range.from -= 1;
 	}
+
 	while (range.to < selection.to && doc.textBetween(range.to, range.to + 1) !== ' ') {
 		try {
 			range.to += 1;
-		} catch (e) {
+		} catch {
 			range.to -= 1;
 			break;
 		}
 	}
+
 	return range;
 }
 
-export function getDetail(editor, range, opt) {
-	slashSelection.set(() => editor.chain().focus().deleteRange(fixRange(editor, range)).run());
-	slashDetail.set(opt);
+export function getDetail(editor: Editor, range: Range, option: DetailInput) {
+	slashSelection.set(() => {
+		editor.chain().focus().deleteRange(fixRange(editor, range)).run();
+	});
+	slashDetail.set(option);
 }
 
 export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 	pluginKey: new PluginKey('slash-suggest'),
 	char: '/',
 	items: ({ query }) => {
-		const raw = [
+		const blocks =
+			typeof window !== 'undefined'
+				? ((window as WindowWithTipTapGlobals).__tiptap_blocks ?? [])
+				: [];
+
+		const raw: SlashGroup[] = [
 			{
 				section: i18n('text'),
 				list: [
 					{
 						icon: 'title',
-						title: i18n('title') + ' 1',
+						title: `${i18n('title')} 1`,
 						subtitle: i18n('title1Info'),
 						command: ({ editor, range }) => {
 							editor
@@ -73,7 +91,7 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 					},
 					{
 						icon: 'title',
-						title: i18n('title') + ' 2',
+						title: `${i18n('title')} 2`,
 						subtitle: i18n('title2Info'),
 						command: ({ editor, range }) => {
 							editor
@@ -86,7 +104,7 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 					},
 					{
 						icon: 'title',
-						title: i18n('title') + ' 3',
+						title: `${i18n('title')} 3`,
 						subtitle: i18n('title3Info'),
 						command: ({ editor, range }) => {
 							editor
@@ -120,25 +138,27 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 			{
 				section: i18n('block'),
 				list: [
-					...(<any>window).__tiptap_blocks,
+					...blocks,
 					{
 						icon: 'image',
 						title: i18n('image'),
 						subtitle: i18n('imageInfo'),
 						command: ({ editor, range }) => {
 							editor.chain().focus().deleteRange(fixRange(editor, range)).run();
+
 							const input = document.createElement('input');
 							input.type = 'file';
 							input.accept = 'image/*';
 							input.onchange = async () => {
-								if (input.files) {
-									const file = input.files[0];
-									if (file) {
-										const upload: UploadFn = (<any>window).__image_uploader || fallbackUpload;
-										const src = await upload(file);
-										editor.chain().focus().deleteRange(range).setImage({ src }).run();
-									}
-								}
+								if (!input.files?.length) return;
+
+								const file = input.files[0];
+								if (!file) return;
+
+								const upload =
+									(window as WindowWithTipTapGlobals).__image_uploader ?? fallbackUpload;
+								const src = await upload(file);
+								editor.chain().focus().deleteRange(range).setImage({ src }).run();
 							};
 							input.click();
 						}
@@ -150,7 +170,7 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 						command: ({ editor, range }) =>
 							getDetail(editor, range, {
 								type: 'code',
-								handler: (input) => {
+								handler: (input?: string) => {
 									editor
 										.chain()
 										.focus()
@@ -165,7 +185,6 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 						title: i18n('mathBlock'),
 						subtitle: i18n('mathBlockInfo'),
 						command: ({ editor, range }) => {
-							const { to } = range;
 							editor
 								.chain()
 								.focus()
@@ -213,7 +232,7 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 							getDetail(editor, range, {
 								title: 'iframe',
 								placeholder: 'url',
-								handler: (input) => {
+								handler: (input: string) => {
 									editor
 										.chain()
 										.focus()
@@ -236,7 +255,7 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 							getDetail(editor, range, {
 								title: 'youtube',
 								placeholder: 'url',
-								handler: (input) => {
+								handler: (input: string) => {
 									editor
 										.chain()
 										.focus()
@@ -250,31 +269,32 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 			}
 		];
 
-		const filtered = raw
+		const normalizedQuery = query.toLowerCase();
+		return raw
 			.map(({ section, list }) => ({
 				section,
 				list: list.filter(
 					(item) =>
-						item.title.toLowerCase().includes(query.toLowerCase()) ||
-						item.subtitle.toLowerCase().includes(query.toLowerCase())
+						item.title.toLowerCase().includes(normalizedQuery) ||
+						item.subtitle?.toLowerCase().includes(normalizedQuery)
 				)
 			}))
 			.filter(({ list }) => list.length > 0);
-
-		return filtered;
 	},
 
 	render: () => {
 		return {
-			onStart: (props) => {
-				let editor = props.editor;
-				let range = props.range;
-				let location = props.clientRect();
+			onStart: (props: SuggestionProps<SlashGroup>) => {
+				const { editor, range } = props;
 				slashProps.set({ editor, range });
 				slashVisible.set(true);
-				slashLocaltion.set({ x: location.x, y: location.y, height: location.height });
 				slashItems.set(props.items);
 				slashDetail.set(null);
+
+				const location = props.clientRect?.();
+				if (location) {
+					slashLocation.set({ x: location.x, y: location.y, height: location.height });
+				}
 			},
 
 			onUpdate(props: SuggestionProps<SlashGroup>) {
