@@ -65,7 +65,11 @@ export default Node.create<EmbedOptions>({
 				(options: { src: string; type: string; width?: string; height?: string }) =>
 				({ tr, dispatch }) => {
 					const { selection } = tr;
-					const node = this.type.create(options);
+					const node = this.type.create({
+						width: options.width ?? '100%',
+						height: options.height ?? '800px',
+						...options
+					});
 					if (dispatch) tr.replaceRangeWith(selection.from, selection.to, node);
 
 					return true;
