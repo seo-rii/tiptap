@@ -213,7 +213,7 @@
 											outlined
 											onclick={() => tiptap.chain().focus().unsetColor().run()}
 										>
-											<Icon colorize />
+											<Icon icon="palette" />
 										</Button>
 									{/snippet}
 									<div

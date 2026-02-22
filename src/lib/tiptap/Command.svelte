@@ -99,7 +99,7 @@
 				</header>
 				<Input
 					placeholder={$slashDetail.placeholder}
-					fullWidth
+					block
 					bind:value={input}
 					bind:input={focus}
 					onsubmit={() => {
@@ -109,7 +109,7 @@
 				/>
 				<footer>
 					<Button
-						tabindex="0"
+						tabindex={0}
 						transparent
 						small
 						onclick={() => {
@@ -119,7 +119,7 @@
 						>{i18n('cancel')}
 					</Button>
 					<Button
-						tabindex="0"
+						tabindex={0}
 						transparent
 						small
 						onclick={() => {
