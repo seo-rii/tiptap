@@ -1,7 +1,12 @@
 import { slashVisible, slashItems, slashLocaltion, slashProps, slashDetail } from './stores';
-import { PluginKey } from 'prosemirror-state';
-import Suggestion from '@tiptap/suggestion';
-import type { Editor } from '@tiptap/core';
+import { PluginKey } from '@tiptap/pm/state';
+import Suggestion, {
+	type SuggestionKeyDownProps,
+	type SuggestionOptions,
+	type SuggestionProps
+} from '@tiptap/suggestion';
+import type { Editor, Range } from '@tiptap/core';
+import type { SlashItem } from './stores';
 
 //@ts-ignore
 import emojis from 'emojis-list';
@@ -36,7 +41,7 @@ function fixRange(editor: Editor, range: any, split = '/') {
 	return range;
 }
 
-export const emoji = {
+export const emoji: Omit<SuggestionOptions<SlashItem>, 'editor'> = {
 	pluginKey: new PluginKey('slash-emoji'),
 	char: ':',
 	items: ({ query }) => {
@@ -72,15 +77,16 @@ export const emoji = {
 				slashDetail.set('emoji');
 			},
 
-			onUpdate(props) {
+			onUpdate(props: SuggestionProps<SlashItem>) {
 				slashItems.set(props.items);
 			},
 
-			onKeyDown(props) {
+			onKeyDown(props: SuggestionKeyDownProps) {
 				if (props.event.key === 'Escape') {
 					slashVisible.set(false);
 					return true;
 				}
+				return false;
 			},
 
 			onExit() {
@@ -90,4 +96,4 @@ export const emoji = {
 	}
 };
 
-export default (editor: Editor) => Suggestion({ ...emoji, editor });
+export default (editor: Editor) => Suggestion<SlashItem>({ ...emoji, editor });

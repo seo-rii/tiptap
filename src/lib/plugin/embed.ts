@@ -2,7 +2,6 @@ import { mergeAttributes, Node } from '@tiptap/core';
 
 export interface EmbedOptions {
 	allowFullscreen: boolean;
-	type: string;
 	HTMLAttributes: {
 		[key: string]: any;
 	};
@@ -11,7 +10,7 @@ export interface EmbedOptions {
 declare module '@tiptap/core' {
 	interface Commands<ReturnType> {
 		embed: {
-			setEmbed: (options: { src: string; type: string; width: string }) => ReturnType;
+			setEmbed: (options: { src: string; type: string; width?: string; height?: string }) => ReturnType;
 		};
 	}
 }
@@ -63,7 +62,7 @@ export default Node.create<EmbedOptions>({
 	addCommands() {
 		return {
 			setEmbed:
-				(options: { src: string; type: string; width: string; height: string }) =>
+				(options: { src: string; type: string; width?: string; height?: string }) =>
 				({ tr, dispatch }) => {
 					const { selection } = tr;
 					const node = this.type.create(options);

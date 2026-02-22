@@ -16,7 +16,7 @@
 			<span>
 				{i18n('newLineInfo')}
 			</span>
-			<Paper bl hover width="160px">
+			<Paper bl hover style="width: 160px">
 				{#snippet target()}
 					<IconButton size="1.2em" icon="text_fields" />
 				{/snippet}

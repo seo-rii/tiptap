@@ -10,14 +10,23 @@
 	import i18n from '$lib/i18n';
 	import ColorPicker from 'svelte-awesome-color-picker';
 	import { isTextSelection } from '@tiptap/core';
+	import type { EditorState, Selection } from '@tiptap/pm/state';
+	import type { EditorView } from '@tiptap/pm/view';
 
-	let { colors = [], editable, override, children } = $props();
+	type Props = {
+		colors?: string[];
+		editable?: boolean;
+		override?: any;
+		children?: any;
+	};
+
+	let { colors = [], editable, override, children }: Props = $props();
 
 	const editor = getContext<{ v: any; c: number }>('editor');
 	const tiptap = $derived(editor.v);
 
-	let selection = $state(null);
-	let table = $state(false);
+	let selection = $state<Selection | null>(null);
+	let table = $state<number[] | false>(false);
 	let sel = $state('');
 	let _sel = $state('');
 	let link = $state(false);
@@ -58,7 +67,16 @@
 		});
 	});
 
-	const shouldShow = ({ view, state, from, to }) => {
+	const shouldShow = ({
+		state,
+		from,
+		to
+	}: {
+		view: EditorView;
+		state: EditorState;
+		from: number;
+		to: number;
+	}) => {
 		const { doc, selection } = state;
 		const { empty } = selection;
 
@@ -94,7 +112,7 @@
 						<Input placeholder="url" bind:value={href} autofocus />
 						<div>
 							<Button
-								tabindex="0"
+								tabindex={0}
 								transparent
 								small
 								onclick={() => {
@@ -104,7 +122,7 @@
 								}}
 								>{i18n('delete')}
 							</Button>
-							<Button tabindex="0" transparent small onclick={() => (link = false)}
+							<Button tabindex={0} transparent small onclick={() => (link = false)}
 								>{i18n('close')}</Button
 							>
 						</div>

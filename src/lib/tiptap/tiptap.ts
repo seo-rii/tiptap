@@ -55,7 +55,9 @@ const lowlight = () => {
 	return lowlight;
 };
 
-const extensions = (placeholder, plugins, crossorigin) => [
+type CrossOrigin = 'anonymous' | 'use-credentials' | undefined;
+
+const extensions = (placeholder: string, plugins: any[], crossorigin: CrossOrigin) => [
 	CodeBlockLowlight.extend({
 		addKeyboardShortcuts() {
 			return {
@@ -113,7 +115,17 @@ const extensions = (placeholder, plugins, crossorigin) => [
 export default (
 	element: Element,
 	content: string,
-	{ placeholder = i18n('placeholder'), plugins = [], crossorigin, ...props }: any = {}
+	{
+		placeholder = i18n('placeholder'),
+		plugins = [],
+		crossorigin,
+		...props
+	}: {
+		placeholder?: string;
+		plugins?: any[];
+		crossorigin?: CrossOrigin;
+		[key: string]: unknown;
+	} = {}
 ) => {
 	const tt = new Editor({
 		element,

@@ -9,9 +9,14 @@ import {
 import i18n from '$lib/i18n';
 import type { UploadFn } from '$lib/plugin/image/dragdrop';
 import { fallbackUpload } from '$lib/plugin/image/dragdrop';
-import { PluginKey } from 'prosemirror-state';
-import { Editor } from '@tiptap/core';
-import Suggestion from '@tiptap/suggestion';
+import { PluginKey } from '@tiptap/pm/state';
+import type { Editor } from '@tiptap/core';
+import Suggestion, {
+	type SuggestionKeyDownProps,
+	type SuggestionOptions,
+	type SuggestionProps
+} from '@tiptap/suggestion';
+import type { SlashGroup } from './stores';
 
 function fixRange(editor: Editor, range: any, split = '/') {
 	const { state } = editor.view,
@@ -44,7 +49,7 @@ export function getDetail(editor, range, opt) {
 	slashDetail.set(opt);
 }
 
-export const suggest = {
+export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 	pluginKey: new PluginKey('slash-suggest'),
 	char: '/',
 	items: ({ query }) => {
@@ -271,15 +276,16 @@ export const suggest = {
 				slashDetail.set(null);
 			},
 
-			onUpdate(props) {
+			onUpdate(props: SuggestionProps<SlashGroup>) {
 				slashItems.set(props.items);
 			},
 
-			onKeyDown(props) {
+			onKeyDown(props: SuggestionKeyDownProps) {
 				if (props.event.key === 'Escape') {
 					slashVisible.set(false);
 					return true;
 				}
+				return false;
 			},
 
 			onExit() {
@@ -289,4 +295,4 @@ export const suggest = {
 	}
 };
 
-export default (editor: Editor) => Suggestion({ ...suggest, editor });
+export default (editor: Editor) => Suggestion<SlashGroup>({ ...suggest, editor });

@@ -5,14 +5,21 @@ import { dropImagePlugin } from '$lib/plugin/image/dragdrop';
 export default (crossorigin = 'anonymous') =>
 	Image.extend({
 		addOptions() {
+			const parentOptions =
+				(this as unknown as { parent?: () => Record<string, unknown> }).parent?.() ?? {};
+
 			return {
-				...this.parent?.(),
+				...parentOptions,
 				sizes: ['inline', 'block', 'left', 'right']
 			};
 		},
 		parseHTML: () => [{ tag: 'img' }],
-		renderHTML({ HTMLAttributes }) {
-			const { style } = HTMLAttributes;
+		renderHTML({
+			HTMLAttributes
+		}: {
+			HTMLAttributes: Record<string, string | number | boolean | null | undefined>;
+		}) {
+			const style = HTMLAttributes.style;
 			return [
 				'figure',
 				{ style },

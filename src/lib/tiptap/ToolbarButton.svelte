@@ -5,19 +5,32 @@
 	const editor = getContext<{ v: any }>('editor');
 	const tiptap = $derived(editor.v);
 
+	type Props = {
+		prop?: string;
+		attrs?: Record<string, unknown>;
+		label?: string;
+		icon?: string;
+		methodName?: string;
+		tooltip?: string | Record<string, any>;
+		handler?: (() => void) | null;
+		children?: any;
+		[key: string]: unknown;
+	};
+
 	let {
 		prop = '',
-		attrs = '',
+		attrs = {},
 		label = '',
 		icon = '',
 		methodName = 'toggle' + prop.charAt(0).toUpperCase() + prop.slice(1),
-		tooltip = null,
+		tooltip,
 		handler = null,
+		children,
 		...rest
-	} = $props();
+	}: Props = $props();
 
 	const isActive = $derived(() => {
-		return editor && prop && tiptap.isActive(prop, attrs);
+		return !!(editor && prop && tiptap.isActive(prop, attrs));
 	});
 
 	function toggle() {
@@ -29,7 +42,7 @@
 </script>
 
 {#if icon}
-	<IconButton size="1.2em" {icon} active={isActive()} onclick={toggle} {tooltip} tabindex="0" />
+	<IconButton size="1.2em" {icon} active={isActive()} onclick={toggle} {tooltip} tabindex={0} />
 {:else}
 	<Button outlined={!isActive()} onclick={handler || toggle} small {...rest}>
 		{label}

@@ -20,7 +20,7 @@
 	let height = $state(0),
 		elements = $state([]);
 	let input = $state(''),
-		focus: any = $state(null);
+		focus = $state<HTMLInputElement | HTMLTextAreaElement | undefined>(undefined);
 
 	$effect(() => {
 		if ($slashVisible) input = '';

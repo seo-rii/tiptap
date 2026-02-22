@@ -1,4 +1,7 @@
-export default function setMath(tiptap) {
+import type { CommandProps, Editor } from '@tiptap/core';
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
+
+export default function setMath(tiptap: Editor) {
 	const { selection } = tiptap.state;
 	tiptap
 		.chain()
