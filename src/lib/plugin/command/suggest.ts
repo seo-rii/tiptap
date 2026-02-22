@@ -10,7 +10,7 @@ import i18n from '$lib/i18n';
 import type { UploadFn } from '$lib/plugin/image/dragdrop';
 import { fallbackUpload } from '$lib/plugin/image/dragdrop';
 import { PluginKey } from '@tiptap/pm/state';
-import type { Editor } from '@tiptap/core';
+import type { Editor, Range } from '@tiptap/core';
 import Suggestion, {
 	type SuggestionKeyDownProps,
 	type SuggestionOptions,
@@ -18,9 +18,10 @@ import Suggestion, {
 } from '@tiptap/suggestion';
 import type { SlashGroup } from './stores';
 
-function fixRange(editor: Editor, range: any, split = '/') {
-	const { state } = editor.view,
-		{ selection, doc } = state;
+function fixRange(editor: Editor, rawRange: Range, split = '/'): Range {
+	const range = { ...rawRange };
+	const { state } = editor.view;
+	const { selection, doc } = state;
 	if (selection.$to.nodeBefore?.text?.includes?.(split)) {
 		range.from = range.to;
 		while (range.from > 0 && doc.textBetween(range.from - 1, range.from) !== split) {
@@ -153,7 +154,7 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 									editor
 										.chain()
 										.focus()
-										.deleteRange(fixRange(editor, range - 1))
+										.deleteRange(fixRange(editor, range))
 										.setNode('codeBlock', { language: input })
 										.run();
 								}
