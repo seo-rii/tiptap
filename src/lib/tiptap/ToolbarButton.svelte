@@ -35,9 +35,11 @@
 
 	function toggle() {
 		if (!tiptap) return;
-		//tiptap.chain().focus().clearNodes().run()
 		if (handler) return handler();
-		setTimeout(() => tiptap.chain().focus()[methodName](attrs)?.run(), 0);
+		setTimeout(() => {
+			const chain = tiptap.chain().focus() as Record<string, (attrs?: unknown) => { run?: () => void }>;
+			chain[methodName]?.(attrs)?.run?.();
+		}, 0);
 	}
 </script>
 
