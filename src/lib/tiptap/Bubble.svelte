@@ -196,7 +196,7 @@
 					<ToolbarButton icon="subscript" prop="subscript" />
 					<ToolbarButton icon="border_color" prop="highlight" />
 					{#if editable}
-						<ToolbarButton icon="functions" handler={() => setMath(tiptap)} />
+						<ToolbarButton icon="functions" prop="math_inline" handler={() => setMath(tiptap)} />
 					{/if}
 					<Paper bl block>
 						{#snippet target()}
