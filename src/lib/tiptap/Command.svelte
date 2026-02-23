@@ -32,16 +32,9 @@
 		setTimeout(() => tiptap?.commands?.focus?.());
 	}
 
-	function runCodeCommand(input?: string) {
-		const detail = slashState.detail;
-		if (!detail || detail === 'emoji' || !('type' in detail) || detail.type !== 'code') return;
-		slashState.selection?.();
-		detail.handler(input);
-	}
-
 	function runDetailCommand() {
 		const detail = slashState.detail;
-		if (!detail || detail === 'emoji' || ('type' in detail && detail.type === 'code')) return;
+		if (!detail || detail === 'emoji') return;
 
 		slashState.selection?.();
 		detail.handler(input);
@@ -102,20 +95,7 @@
 					{/if}
 				</List>
 			</div>
-		{:else if slashState.detail && 'type' in slashState.detail && slashState.detail.type === 'code'}
-			<div class="detail">
-				<header>
-					<IconButton icon="arrow_back" onclick={() => (slashState.detail = null)} />
-					<div class="title">{i18n('insertCode')}</div>
-				</header>
-				<div>
-					<Button small onclick={() => runCodeCommand(undefined)}>{i18n('auto')}</Button>
-					{#each ['cpp', 'python', 'java'] as lang (lang)}
-						<Button small outlined onclick={() => runCodeCommand(lang)}>{lang}</Button>
-					{/each}
-				</div>
-			</div>
-		{:else if slashState.detail && !('type' in slashState.detail)}
+		{:else if slashState.detail}
 			<div class="detail">
 				<header>
 					<IconButton icon="arrow_back" onclick={() => (slashState.detail = null)} />

@@ -210,18 +210,14 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 						title: i18n('codeBlock'),
 						subtitle: i18n('codeBlockInfo'),
 						keywords: createKeywords(['codeBlock', 'codeBlockInfo'], ['code']),
-						command: ({ editor, range }) =>
-							getDetail(editor, range, {
-								type: 'code',
-								handler: (input?: string) => {
-									editor
-										.chain()
-										.focus()
-										.deleteRange(fixRange(editor, range))
-										.setNode('codeBlock', { language: input })
-										.run();
-								}
-							})
+						command: ({ editor, range }) => {
+							editor
+								.chain()
+								.focus()
+								.deleteRange(fixRange(editor, range))
+								.setNode('codeBlock', { language: null })
+								.run();
+						}
 					},
 					{
 						icon: 'functions',

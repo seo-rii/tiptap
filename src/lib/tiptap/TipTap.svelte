@@ -249,6 +249,20 @@
 		}
 	}
 
+	main :global(.tiptap-code-block-toolbar) {
+		position: absolute;
+		top: 8px;
+		right: 8px;
+		z-index: 1;
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	main:not(.editable) :global(.tiptap-code-block-toolbar) {
+		visibility: hidden;
+		pointer-events: none;
+	}
+
 	.target > :global(div) > :global(*:first-child) {
 		margin-top: 0 !important;
 	}
@@ -308,6 +322,20 @@
 			padding: 12px;
 			border-radius: 12px;
 			max-width: 100%;
+		}
+
+		& :global(.tiptap-code-block) {
+			max-width: 100%;
+			position: relative;
+		}
+
+		& :global(.tiptap-code-block-language) {
+			padding: 2px 6px;
+			border-radius: 8px;
+			border: 1px solid var(--primary-light2, #ddd);
+			background: var(--surface, #fff);
+			color: var(--on-surface, #000);
+			font-size: 0.75em;
 		}
 
 		& :global(table) {

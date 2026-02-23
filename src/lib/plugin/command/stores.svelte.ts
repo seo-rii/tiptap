@@ -22,10 +22,6 @@ export type SlashDetail =
 	| null
 	| 'emoji'
 	| {
-			type: 'code';
-			handler: (input?: string) => void;
-	  }
-	| {
 			title: string;
 			placeholder: string;
 			handler: (input: string) => void;

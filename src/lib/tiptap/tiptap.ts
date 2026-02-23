@@ -46,6 +46,24 @@ import go from 'highlight.js/lib/languages/go';
 import csharp from 'highlight.js/lib/languages/csharp';
 import rust from 'highlight.js/lib/languages/rust';
 
+type CodeBlockLanguageOption = {
+	value: string;
+	label: string;
+};
+
+const codeBlockLanguageOptions: CodeBlockLanguageOption[] = [
+	{ value: 'auto', label: 'auto' },
+	{ value: 'cpp', label: 'cpp' },
+	{ value: 'python', label: 'python' },
+	{ value: 'java', label: 'java' },
+	{ value: 'js', label: 'js' },
+	{ value: 'ts', label: 'ts' },
+	{ value: 'kotlin', label: 'kotlin' },
+	{ value: 'go', label: 'go' },
+	{ value: 'csharp', label: 'csharp' },
+	{ value: 'rust', label: 'rust' }
+];
+
 const lowlight = () => {
 	const lowlight = createLowlight(all);
 
@@ -59,6 +77,12 @@ const lowlight = () => {
 	lowlight.register('csharp', csharp);
 	lowlight.register('rust', rust);
 	return lowlight;
+};
+
+const normalizeCodeBlockLanguage = (language: unknown) => {
+	if (typeof language !== 'string') return 'auto';
+	const normalized = language.trim();
+	return normalized.length ? normalized : 'auto';
 };
 
 const slashKeymap = Extension.create({
@@ -96,20 +120,108 @@ const slashKeymap = Extension.create({
 
 type CrossOrigin = 'anonymous' | 'use-credentials' | undefined;
 
-const extensions = (placeholder: string, plugins: any[], crossorigin: CrossOrigin) => [
-	CodeBlockLowlight.extend({
-		addKeyboardShortcuts() {
+const CodeBlockWithLanguageSelect = CodeBlockLowlight.extend({
+	addKeyboardShortcuts() {
+		return {
+			...this.parent?.(),
+			Tab: () => {
+				if (this.editor.isActive('codeBlock')) {
+					return this.editor.commands.insertContent('    ');
+				}
+				return false;
+			}
+		};
+	},
+	addNodeView() {
+		return ({ node, getPos, editor }) => {
+			let currentNode = node;
+
+			const dom = document.createElement('div');
+			dom.className = 'tiptap-code-block';
+
+			const toolbar = document.createElement('div');
+			toolbar.className = 'tiptap-code-block-toolbar';
+
+			const languageSelect = document.createElement('select');
+			languageSelect.className = 'tiptap-code-block-language';
+			for (const option of codeBlockLanguageOptions) {
+				const element = document.createElement('option');
+				element.value = option.value;
+				element.textContent = option.label;
+				languageSelect.append(element);
+			}
+			toolbar.append(languageSelect);
+
+			const pre = document.createElement('pre');
+			const contentDOM = document.createElement('code');
+			pre.append(contentDOM);
+			dom.append(toolbar, pre);
+
+			const ensureLanguageOption = (value: string) => {
+				if ([...languageSelect.options].some((option) => option.value === value)) return;
+				const element = document.createElement('option');
+				element.value = value;
+				element.textContent = value;
+				languageSelect.append(element);
+			};
+
+			const syncLanguageSelection = () => {
+				const language = normalizeCodeBlockLanguage(currentNode.attrs.language);
+				ensureLanguageOption(language);
+				languageSelect.value = language;
+			};
+
+			const handleLanguageChange = () => {
+				let pos: number | null = null;
+				try {
+					pos = getPos();
+				} catch {
+					pos = null;
+				}
+				if (typeof pos !== 'number') return;
+
+				const selectedLanguage = languageSelect.value;
+				const language = selectedLanguage === 'auto' ? null : selectedLanguage;
+				const latestNode = editor.state.doc.nodeAt(pos);
+				if (!latestNode || latestNode.type.name !== this.name) return;
+
+				editor.commands.command(({ tr, dispatch }) => {
+					tr.setNodeMarkup(pos, undefined, {
+						...latestNode.attrs,
+						language
+					});
+					dispatch?.(tr);
+					return true;
+				});
+			};
+
+			languageSelect.addEventListener('change', handleLanguageChange);
+			syncLanguageSelection();
+
 			return {
-				...this.parent?.(),
-				Tab: () => {
-					if (this.editor.isActive('codeBlock')) {
-						return this.editor.commands.insertContent('    ');
-					}
-					return false;
+				dom,
+				contentDOM,
+				update: (updatedNode) => {
+					if (updatedNode.type !== currentNode.type) return false;
+					currentNode = updatedNode;
+					syncLanguageSelection();
+					return true;
+				},
+				stopEvent: (event) => {
+					const target = event.target;
+					if (!(target instanceof HTMLElement)) return false;
+					return Boolean(target.closest('.tiptap-code-block-toolbar'));
+				},
+				destroy: () => {
+					languageSelect.removeEventListener('change', handleLanguageChange);
 				}
 			};
-		}
-	}).configure({ lowlight: lowlight() }),
+		};
+	}
+}).configure({ lowlight: lowlight() });
+
+const extensions = (placeholder: string, plugins: any[], crossorigin: CrossOrigin) => [
+	CodeBlockWithLanguageSelect,
 	slashKeymap,
 	Image(crossorigin),
 	Youtube,
