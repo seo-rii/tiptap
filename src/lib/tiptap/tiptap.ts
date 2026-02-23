@@ -1,5 +1,8 @@
 import { Editor, Extension, mergeAttributes } from '@tiptap/core';
-import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import {
+	CodeBlockLowlight,
+	type CodeBlockLowlightOptions
+} from '@tiptap/extension-code-block-lowlight';
 import { all, createLowlight } from 'lowlight';
 import Code from '@tiptap/extension-code';
 import Image from '$lib/plugin/image';
@@ -51,6 +54,11 @@ type CodeBlockLanguageOption = {
 	label: string;
 };
 
+type CodeBlockLanguageLabelMap = Record<string, string>;
+type CodeBlockWithLanguageSelectOptions = CodeBlockLowlightOptions & {
+	languageLabelMap: CodeBlockLanguageLabelMap;
+};
+
 const codeBlockLanguageOptions: CodeBlockLanguageOption[] = [
 	{ value: 'auto', label: 'auto' },
 	{ value: 'cpp', label: 'cpp' },
@@ -83,6 +91,15 @@ const normalizeCodeBlockLanguage = (language: unknown) => {
 	if (typeof language !== 'string') return 'auto';
 	const normalized = language.trim();
 	return normalized.length ? normalized : 'auto';
+};
+
+const resolveCodeBlockLanguageLabel = (
+	value: string,
+	labelMap: CodeBlockLanguageLabelMap,
+	fallbackLabel = value
+) => {
+	const label = labelMap[value]?.trim();
+	return label?.length ? label : fallbackLabel;
 };
 
 const slashKeymap = Extension.create({
@@ -120,7 +137,13 @@ const slashKeymap = Extension.create({
 
 type CrossOrigin = 'anonymous' | 'use-credentials' | undefined;
 
-const CodeBlockWithLanguageSelect = CodeBlockLowlight.extend({
+const CodeBlockWithLanguageSelect = CodeBlockLowlight.extend<CodeBlockWithLanguageSelectOptions>({
+	addOptions() {
+		return {
+			...this.parent?.(),
+			languageLabelMap: {} as CodeBlockLanguageLabelMap
+		};
+	},
 	addKeyboardShortcuts() {
 		return {
 			...this.parent?.(),
@@ -135,6 +158,7 @@ const CodeBlockWithLanguageSelect = CodeBlockLowlight.extend({
 	addNodeView() {
 		return ({ node, getPos, editor }) => {
 			let currentNode = node;
+			const languageLabelMap = this.options.languageLabelMap || {};
 
 			const dom = document.createElement('div');
 			dom.className = 'tiptap-code-block';
@@ -147,7 +171,11 @@ const CodeBlockWithLanguageSelect = CodeBlockLowlight.extend({
 			for (const option of codeBlockLanguageOptions) {
 				const element = document.createElement('option');
 				element.value = option.value;
-				element.textContent = option.label;
+				element.textContent = resolveCodeBlockLanguageLabel(
+					option.value,
+					languageLabelMap,
+					option.label
+				);
 				languageSelect.append(element);
 			}
 			toolbar.append(languageSelect);
@@ -161,7 +189,7 @@ const CodeBlockWithLanguageSelect = CodeBlockLowlight.extend({
 				if ([...languageSelect.options].some((option) => option.value === value)) return;
 				const element = document.createElement('option');
 				element.value = value;
-				element.textContent = value;
+				element.textContent = resolveCodeBlockLanguageLabel(value, languageLabelMap);
 				languageSelect.append(element);
 			};
 
@@ -218,10 +246,18 @@ const CodeBlockWithLanguageSelect = CodeBlockLowlight.extend({
 			};
 		};
 	}
-}).configure({ lowlight: lowlight() });
+});
 
-const extensions = (placeholder: string, plugins: any[], crossorigin: CrossOrigin) => [
-	CodeBlockWithLanguageSelect,
+const extensions = (
+	placeholder: string,
+	plugins: any[],
+	crossorigin: CrossOrigin,
+	codeBlockLanguageLabels: CodeBlockLanguageLabelMap
+) => [
+	CodeBlockWithLanguageSelect.configure({
+		lowlight: lowlight(),
+		languageLabelMap: codeBlockLanguageLabels
+	}),
 	slashKeymap,
 	Image(crossorigin),
 	Youtube,
@@ -271,11 +307,13 @@ export default (
 		placeholder = i18n('placeholder'),
 		plugins = [],
 		crossorigin,
+		codeBlockLanguageLabels = {},
 		...props
 	}: {
 		placeholder?: string;
 		plugins?: any[];
 		crossorigin?: CrossOrigin;
+		codeBlockLanguageLabels?: CodeBlockLanguageLabelMap;
 		[key: string]: unknown;
 	} = {}
 ) => {
@@ -283,7 +321,7 @@ export default (
 		element,
 		content,
 		...props,
-		extensions: extensions(placeholder, plugins, crossorigin)
+		extensions: extensions(placeholder, plugins, crossorigin, codeBlockLanguageLabels)
 	});
 	// Suggestion key handlers must run before default keymap handlers.
 	tt.registerPlugin(emoji(tt), (plugin, all) => [plugin, ...all]);

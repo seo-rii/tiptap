@@ -11,7 +11,12 @@
 		normalizeSlashIndex,
 		slashState
 	} from '$lib/plugin/command/stores.svelte';
-	import i18n from '$lib/i18n';
+	import {
+		I18N_CONTEXT,
+		setLocale as setI18nLocale,
+		translateWithLocale,
+		type I18nTranslate
+	} from '$lib/i18n';
 	import type { UploadFn } from '$lib/plugin/image/dragdrop';
 	import { fallbackUpload } from '$lib/plugin/image/dragdrop';
 	import { Render } from 'nunui';
@@ -27,11 +32,13 @@
 		style?: string;
 		blocks?: any[];
 		placeholder?: string;
+		locale?: string;
 		sanitize?: Record<string, any>;
 		colors?: string[];
 		bubble?: any;
 		preloader?: any;
 		crossorigin?: 'anonymous' | 'use-credentials';
+		codeBlockLanguageLabels?: Record<string, string>;
 	};
 
 	let {
@@ -44,7 +51,8 @@
 		imageUpload = fallbackUpload,
 		style = '',
 		blocks = [],
-		placeholder = i18n('placeholder'),
+		placeholder,
+		locale,
 		sanitize = {},
 		colors = [
 			'#ef5350', //red
@@ -58,8 +66,11 @@
 		],
 		bubble = null,
 		preloader,
-		crossorigin = 'anonymous'
+		crossorigin = 'anonymous',
+		codeBlockLanguageLabels = {}
 	}: Props = $props();
+
+	const scopedI18n: I18nTranslate = (...args) => translateWithLocale(locale, ...args);
 
 	const san = (body: string) =>
 		sanitizeHtml(body || '', {
@@ -94,10 +105,15 @@
 
 	const tiptap = $state({ v: null as any, c: 0 });
 	setContext('editor', tiptap);
+	setContext(I18N_CONTEXT, scopedI18n);
 	let element: Element,
 		fullscreen = $state(false),
 		mounted = $state(false),
 		last = $state('');
+
+	$effect(() => {
+		setI18nLocale(locale);
+	});
 
 	$effect(() => {
 		if (tiptap.v) tiptap.v.setEditable(editable);
@@ -116,14 +132,16 @@
 		Promise.all([import('./tiptap'), import('@justinribeiro/lite-youtube')]).then(
 			([{ default: tt }]) => {
 				if (!untrack(() => mounted)) return;
+				const editorPlaceholder = placeholder ?? scopedI18n('placeholder');
 				tiptap.v = ref = tt(element, r, {
-					placeholder,
+					placeholder: editorPlaceholder,
 					editable,
 					onTransaction: () => {
 						tiptap.v = ref = tiptap.v;
 						tiptap.c++;
 					},
 					crossorigin,
+					codeBlockLanguageLabels,
 					...options
 				});
 				tiptap.v.on('update', ({ editor: tiptap }: any) => {
@@ -333,9 +351,16 @@
 			padding: 2px 6px;
 			border-radius: 8px;
 			border: 1px solid var(--primary-light2, #ddd);
+			outline: 1px solid transparent;
+			outline-offset: 0;
 			background: var(--surface, #fff);
 			color: var(--on-surface, #000);
 			font-size: 0.75em;
+
+			&:focus,
+			&:focus-visible {
+				outline-color: var(--primary-light9, #89a2d9);
+			}
 		}
 
 		& :global(table) {
