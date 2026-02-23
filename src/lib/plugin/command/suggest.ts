@@ -13,8 +13,11 @@ import {
 import i18n from '$lib/i18n';
 import enUs from '$lib/i18n/en-us/index';
 import koKr from '$lib/i18n/ko-kr/index';
-import type { UploadFn } from '$lib/plugin/image/dragdrop';
-import { fallbackUpload } from '$lib/plugin/image/dragdrop';
+import {
+	fallbackUpload,
+	releaseObjectUrlOnImageSettled,
+	type UploadFn
+} from '$lib/plugin/image/dragdrop';
 import { PluginKey } from '@tiptap/pm/state';
 import type { Editor, Range } from '@tiptap/core';
 import Suggestion, {
@@ -201,6 +204,7 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 									(window as WindowWithTipTapGlobals).__image_uploader ?? fallbackUpload;
 								const src = await upload(file);
 								editor.chain().focus().deleteRange(range).setImage({ src }).run();
+								releaseObjectUrlOnImageSettled(editor.view, src);
 							};
 							input.click();
 						}

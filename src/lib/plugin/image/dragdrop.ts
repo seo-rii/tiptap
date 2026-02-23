@@ -1,7 +1,78 @@
-import { Plugin, PluginKey } from 'prosemirror-state';
+import { Plugin } from 'prosemirror-state';
+import type { EditorView } from 'prosemirror-view';
 
 export type UploadFn = (image: File) => Promise<string>;
 export const fallbackUpload = async (image: File) => URL.createObjectURL(image);
+
+const OBJECT_URL_PREFIX = 'blob:';
+const OBJECT_URL_REVOKE_TIMEOUT_MS = 30_000;
+
+const isObjectUrl = (src: string) => src.startsWith(OBJECT_URL_PREFIX);
+
+const revokeObjectUrl = (src: string) => {
+	try {
+		URL.revokeObjectURL(src);
+	} catch {
+		// no-op
+	}
+};
+
+export const releaseObjectUrlOnImageSettled = (view: EditorView, src: string) => {
+	if (!isObjectUrl(src)) return;
+
+	let released = false;
+	const cleanups: Array<() => void> = [];
+
+	const release = () => {
+		if (released) return;
+		released = true;
+		cleanups.forEach((cleanup) => cleanup());
+		cleanups.length = 0;
+		revokeObjectUrl(src);
+	};
+
+	const timer = setTimeout(release, OBJECT_URL_REVOKE_TIMEOUT_MS);
+	cleanups.push(() => clearTimeout(timer));
+
+	const bind = () => {
+		const images = Array.from(view.dom.querySelectorAll('img')).filter(
+			(image) => image.getAttribute('src') === src
+		);
+
+		if (!images.length) return false;
+
+		let pending = 0;
+
+		images.forEach((image) => {
+			if (image.complete) return;
+
+			pending += 1;
+			const settle = () => {
+				image.removeEventListener('load', settle);
+				image.removeEventListener('error', settle);
+				pending -= 1;
+				if (pending <= 0) release();
+			};
+
+			image.addEventListener('load', settle);
+			image.addEventListener('error', settle);
+			cleanups.push(() => {
+				image.removeEventListener('load', settle);
+				image.removeEventListener('error', settle);
+			});
+		});
+
+		if (pending <= 0) release();
+		return true;
+	};
+
+	queueMicrotask(() => {
+		if (bind()) return;
+		requestAnimationFrame(() => {
+			bind();
+		});
+	});
+};
 
 export const dropImagePlugin = () => {
 	return new Plugin({
@@ -25,6 +96,7 @@ export const dropImagePlugin = () => {
 									});
 									const transaction = view.state.tr.replaceSelectionWith(node);
 									view.dispatch(transaction);
+									releaseObjectUrlOnImageSettled(view, src);
 								});
 							}
 						} else {
@@ -73,11 +145,13 @@ export const dropImagePlugin = () => {
 						const reader = new FileReader();
 
 						if (upload) {
+							const src = await upload(image);
 							const node = schema.nodes.image.create({
-								src: await upload(image)
+								src
 							});
 							const transaction = view.state.tr.insert(coordinates.pos, node);
 							view.dispatch(transaction);
+							releaseObjectUrlOnImageSettled(view, src);
 						} else {
 							reader.onload = (readerEvent) => {
 								const node = schema.nodes.image.create({
