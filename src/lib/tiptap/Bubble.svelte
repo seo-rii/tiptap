@@ -77,6 +77,8 @@
 		from: number;
 		to: number;
 	}) => {
+		if (!tiptap?.isEditable) return false;
+
 		const { doc, selection } = state;
 		const { empty } = selection;
 
