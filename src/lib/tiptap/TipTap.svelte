@@ -8,6 +8,7 @@
 	import {
 		countSlashItems,
 		flattenSlashItems,
+		normalizeSlashIndex,
 		slashState
 	} from '$lib/plugin/command/stores.svelte';
 	import i18n from '$lib/i18n';
@@ -154,23 +155,29 @@
 		tiptap.v?.commands?.setContent?.(body);
 	});
 
-	$effect(() => {
-		if (!slashState.visible) slashState.selectedIndex = 0;
-	});
-
 	function handleKeydown(event: KeyboardEvent) {
+		if (event.defaultPrevented) return true;
 		if (!slashState.visible) return false;
 		const count = countSlashItems();
 		if (!count) return false;
 
+		if (event.key === 'Tab') {
+			event.preventDefault();
+			slashState.selectedIndex += event.shiftKey ? -1 : 1;
+			normalizeSlashIndex();
+			return true;
+		}
+
 		if (event.key === 'ArrowUp') {
 			event.preventDefault();
-			slashState.selectedIndex = (slashState.selectedIndex + count - 1) % count;
+			slashState.selectedIndex -= 1;
+			normalizeSlashIndex();
 			return true;
 		}
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
-			slashState.selectedIndex = (slashState.selectedIndex + 1) % count;
+			slashState.selectedIndex += 1;
+			normalizeSlashIndex();
 			return true;
 		}
 

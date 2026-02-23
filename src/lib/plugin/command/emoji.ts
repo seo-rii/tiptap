@@ -1,4 +1,7 @@
 import {
+	closeSlash,
+	moveSlashSelection,
+	runSlashItemAt,
 	setSlashItems,
 	setSlashLocation,
 	setSlashProps,
@@ -99,15 +102,34 @@ export const emoji: Omit<SuggestionOptions<SlashItem>, 'editor'> = {
 			},
 
 			onKeyDown(props: SuggestionKeyDownProps) {
+				if (props.event.key === 'ArrowUp') {
+					props.event.preventDefault();
+					moveSlashSelection(-1);
+					return true;
+				}
+				if (props.event.key === 'ArrowDown') {
+					props.event.preventDefault();
+					moveSlashSelection(1);
+					return true;
+				}
+				if (props.event.key === 'Tab') {
+					props.event.preventDefault();
+					moveSlashSelection(props.event.shiftKey ? -1 : 1);
+					return true;
+				}
+				if (props.event.key === 'Enter') {
+					props.event.preventDefault();
+					return runSlashItemAt(slashState.selectedIndex);
+				}
 				if (props.event.key === 'Escape') {
-					slashState.visible = false;
+					closeSlash();
 					return true;
 				}
 				return false;
 			},
 
 			onExit() {
-				slashState.visible = false;
+				closeSlash();
 			}
 		};
 	}

@@ -1,4 +1,4 @@
-import { Editor, mergeAttributes } from '@tiptap/core';
+import { Editor, Extension, mergeAttributes } from '@tiptap/core';
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
 import { all, createLowlight } from 'lowlight';
 import Code from '@tiptap/extension-code';
@@ -28,6 +28,12 @@ import Placeholder from '@tiptap/extension-placeholder';
 
 import command from '$lib/plugin/command/suggest';
 import emoji from '$lib/plugin/command/emoji';
+import {
+	countSlashItems,
+	moveSlashSelection,
+	runSlashItemAt,
+	slashState
+} from '$lib/plugin/command/stores.svelte';
 import i18n from '$lib/i18n';
 
 import js from 'highlight.js/lib/languages/javascript';
@@ -55,6 +61,39 @@ const lowlight = () => {
 	return lowlight;
 };
 
+const slashKeymap = Extension.create({
+	name: 'slash-keymap',
+	priority: 10000,
+	addKeyboardShortcuts() {
+		return {
+			Enter: () => {
+				if (!slashState.visible) return false;
+				return runSlashItemAt(slashState.selectedIndex);
+			},
+			Tab: () => {
+				if (!slashState.visible || countSlashItems() === 0) return false;
+				moveSlashSelection(1);
+				return true;
+			},
+			'Shift-Tab': () => {
+				if (!slashState.visible || countSlashItems() === 0) return false;
+				moveSlashSelection(-1);
+				return true;
+			},
+			ArrowUp: () => {
+				if (!slashState.visible || countSlashItems() === 0) return false;
+				moveSlashSelection(-1);
+				return true;
+			},
+			ArrowDown: () => {
+				if (!slashState.visible || countSlashItems() === 0) return false;
+				moveSlashSelection(1);
+				return true;
+			}
+		};
+	}
+});
+
 type CrossOrigin = 'anonymous' | 'use-credentials' | undefined;
 
 const extensions = (placeholder: string, plugins: any[], crossorigin: CrossOrigin) => [
@@ -66,11 +105,12 @@ const extensions = (placeholder: string, plugins: any[], crossorigin: CrossOrigi
 					if (this.editor.isActive('codeBlock')) {
 						return this.editor.commands.insertContent('    ');
 					}
-					return true;
+					return false;
 				}
 			};
 		}
 	}).configure({ lowlight: lowlight() }),
+	slashKeymap,
 	Image(crossorigin),
 	Youtube,
 	StarterKit,
@@ -133,7 +173,8 @@ export default (
 		...props,
 		extensions: extensions(placeholder, plugins, crossorigin)
 	});
-	tt.registerPlugin(emoji(tt));
-	tt.registerPlugin(command(tt));
+	// Suggestion key handlers must run before default keymap handlers.
+	tt.registerPlugin(emoji(tt), (plugin, all) => [plugin, ...all]);
+	tt.registerPlugin(command(tt), (plugin, all) => [plugin, ...all]);
 	return tt;
 };

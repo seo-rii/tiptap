@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button, IconButton, Input, List, OneLine, TwoLine } from 'nunui';
-	import { getContext } from 'svelte';
+	import { getContext, tick } from 'svelte';
 	import {
 		isSlashGroup,
 		isSlashItem,
@@ -18,6 +18,7 @@
 	let height = $state(0);
 	let input = $state(''),
 		focus = $state<HTMLInputElement | HTMLTextAreaElement | undefined>(undefined);
+	let menu = $state<HTMLElement | null>(null);
 
 	const emojiItems = $derived(slashState.items.filter(isSlashItem));
 	const groupedItems = $derived(slashState.items.filter(isSlashGroup));
@@ -54,6 +55,17 @@
 		setTimeout(() => focus?.focus?.(), 100);
 	});
 
+	$effect(() => {
+		if (!slashState.visible) return;
+		const detail = slashState.detail;
+		if (detail && detail !== 'emoji') return;
+
+		const selectedIndex = slashState.selectedIndex;
+		void tick().then(() => {
+			const target = menu?.querySelector<HTMLElement>(`[data-slash-index="${selectedIndex}"]`);
+			target?.scrollIntoView({ block: 'nearest' });
+		});
+	});
 </script>
 
 <svelte:window bind:innerHeight={height} />
@@ -62,6 +74,7 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 	<div class="scrim" onclick={() => (slashState.visible = false)}></div>
 	<main
+		bind:this={menu}
 		style="left: {slashState.location.x}px; top: {slashState.location.y +
 			slashState.location.height +
 			384 >
@@ -72,12 +85,12 @@
 	>
 		{#if slashState.detail === 'emoji'}
 			<div class="list">
-					<List>
-						{#each emojiItems as item, i (item.title)}
-							<div transition:slide={{ duration: 400, easing: quartOut }}>
-								<OneLine
-									onclick={() => runCommand(item)}
-									title={item.title}
+				<List>
+					{#each emojiItems as item, i (item.title)}
+						<div data-slash-index={i} transition:slide={{ duration: 400, easing: quartOut }}>
+							<OneLine
+								onclick={() => runCommand(item)}
+								title={item.title}
 								active={slashState.selectedIndex === i}
 							/>
 						</div>
@@ -141,12 +154,15 @@
 						<div class="section" transition:slide={{ duration: 400, easing: quartOut }}>
 							{group.section}
 						</div>
-							<div transition:slide={{ duration: 400, easing: quartOut }}>
-								{#each group.list as item, i (item.title)}
-									<div transition:slide={{ duration: 400, easing: quartOut }}>
-										<TwoLine
-											onmouseenter={() => (slashState.selectedIndex = i + lastCount)}
-											onclick={() => runCommand(item)}
+						<div transition:slide={{ duration: 400, easing: quartOut }}>
+							{#each group.list as item, i (item.title)}
+								<div
+									data-slash-index={i + lastCount}
+									transition:slide={{ duration: 400, easing: quartOut }}
+								>
+									<TwoLine
+										onmouseenter={() => (slashState.selectedIndex = i + lastCount)}
+										onclick={() => runCommand(item)}
 										icon={item.icon}
 										title={item.title}
 										subtitle={item.subtitle || ''}

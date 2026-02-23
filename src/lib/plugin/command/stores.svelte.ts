@@ -77,6 +77,16 @@ export function countSlashItems(items: SlashEntry[] = slashState.items): number 
 	return flattenSlashItems(items).length;
 }
 
+export function moveSlashSelection(delta: number) {
+	const count = countSlashItems();
+	if (count === 0) {
+		slashState.selectedIndex = 0;
+		return;
+	}
+	slashState.selectedIndex += delta;
+	normalizeSlashIndex();
+}
+
 export function normalizeSlashIndex() {
 	const count = countSlashItems();
 	if (count === 0) {
@@ -99,4 +109,17 @@ export function setSlashLocation(location: SlashLocation) {
 	slashState.location.x = location.x;
 	slashState.location.y = location.y;
 	slashState.location.height = location.height;
+}
+
+export function runSlashItemAt(index: number): boolean {
+	const item = flattenSlashItems()[index];
+	const { editor, range } = slashState.props;
+	if (!item || !editor || !range) return false;
+	item.command({ editor, range });
+	return true;
+}
+
+export function closeSlash() {
+	slashState.visible = false;
+	slashState.selectedIndex = 0;
 }
