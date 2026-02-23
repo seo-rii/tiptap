@@ -5,9 +5,12 @@
 	import type { CommandProps } from '@tiptap/core';
 	import { NodeSelection } from '@tiptap/pm/state';
 	import ToolbarButton from '$lib/tiptap/ToolbarButton.svelte';
-	import i18n from '$lib/i18n';
+	import defaultI18n, { I18N_CONTEXT, type I18nTranslate } from '$lib/i18n';
 
 	const editor = getContext<{ v: any }>('editor');
+	const i18nFromContext = getContext<I18nTranslate | undefined>(I18N_CONTEXT);
+	const i18n: I18nTranslate = (...args) =>
+		i18nFromContext ? i18nFromContext(...args) : defaultI18n(...args);
 	const tiptap = $derived(editor.v);
 
 	function insertMathInline() {

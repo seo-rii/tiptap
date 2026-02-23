@@ -7,7 +7,7 @@
 	import deleteTable from '$lib/plugin/table/deleteTable';
 	import setMath from '$lib/tiptap/setMath';
 	import { Button, Icon, IconButton, Input, List, OneLine, Paper, Render } from 'nunui';
-	import i18n from '$lib/i18n';
+	import defaultI18n, { I18N_CONTEXT, type I18nTranslate } from '$lib/i18n';
 	import ColorPicker from 'svelte-awesome-color-picker';
 	import { isTextSelection } from '@tiptap/core';
 	import type { EditorState, Selection } from '@tiptap/pm/state';
@@ -23,6 +23,9 @@
 	let { colors = [], editable, override, children }: Props = $props();
 
 	const editor = getContext<{ v: any; c: number }>('editor');
+	const i18nFromContext = getContext<I18nTranslate | undefined>(I18N_CONTEXT);
+	const i18n: I18nTranslate = (...args) =>
+		i18nFromContext ? i18nFromContext(...args) : defaultI18n(...args);
 	const tiptap = $derived(editor.v);
 
 	let selection = $state<Selection | null>(null);
