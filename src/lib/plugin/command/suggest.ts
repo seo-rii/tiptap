@@ -18,7 +18,7 @@ import {
 	releaseObjectUrlOnImageSettled,
 	type UploadFn
 } from '$lib/plugin/image/dragdrop';
-import { PluginKey } from '@tiptap/pm/state';
+import { PluginKey, TextSelection } from '@tiptap/pm/state';
 import type { Editor, Range } from '@tiptap/core';
 import Suggestion, {
 	type SuggestionKeyDownProps,
@@ -220,6 +220,30 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 								.focus()
 								.deleteRange(fixRange(editor, range))
 								.setNode('codeBlock', { language: null })
+								.command(({ tr }) => {
+									const { from } = tr.selection;
+									const $from = tr.doc.resolve(from);
+
+									if ($from.parent.type.name === 'codeBlock') {
+										tr.setSelection(TextSelection.create(tr.doc, $from.start()));
+										return true;
+									}
+
+									const before = $from.nodeBefore;
+									if (before?.type.name === 'codeBlock') {
+										const positionInsideCodeBlock = from - before.nodeSize + 1;
+										tr.setSelection(TextSelection.create(tr.doc, positionInsideCodeBlock));
+										return true;
+									}
+
+									const after = $from.nodeAfter;
+									if (after?.type.name === 'codeBlock') {
+										tr.setSelection(TextSelection.create(tr.doc, from + 1));
+									}
+
+									return true;
+								})
+								.focus()
 								.run();
 						}
 					},
