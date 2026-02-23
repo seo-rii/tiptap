@@ -10,7 +10,12 @@ export interface EmbedOptions {
 declare module '@tiptap/core' {
 	interface Commands<ReturnType> {
 		embed: {
-			setEmbed: (options: { src: string; type: string; width?: string; height?: string }) => ReturnType;
+			setEmbed: (options: {
+				src: string;
+				type: string;
+				width?: string;
+				height?: string;
+			}) => ReturnType;
 		};
 	}
 }

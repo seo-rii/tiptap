@@ -37,7 +37,10 @@
 		if (!tiptap) return;
 		if (handler) return handler();
 		setTimeout(() => {
-			const chain = tiptap.chain().focus() as Record<string, (attrs?: unknown) => { run?: () => void }>;
+			const chain = tiptap.chain().focus() as Record<
+				string,
+				(attrs?: unknown) => { run?: () => void }
+			>;
 			chain[methodName]?.(attrs)?.run?.();
 		}, 0);
 	}
