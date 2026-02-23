@@ -1,11 +1,12 @@
 import {
-	slashVisible,
-	slashItems,
-	slashLocation,
-	slashProps,
-	slashDetail,
-	slashSelection
-} from './stores';
+	setSlashItems,
+	setSlashLocation,
+	setSlashProps,
+	slashState,
+	type SlashDetail,
+	type SlashGroup,
+	type SlashItem
+} from './stores.svelte';
 import i18n from '$lib/i18n';
 import type { UploadFn } from '$lib/plugin/image/dragdrop';
 import { fallbackUpload } from '$lib/plugin/image/dragdrop';
@@ -16,7 +17,6 @@ import Suggestion, {
 	type SuggestionOptions,
 	type SuggestionProps
 } from '@tiptap/suggestion';
-import type { SlashDetail, SlashGroup, SlashItem } from './stores';
 
 type WindowWithTipTapGlobals = Window &
 	typeof globalThis & {
@@ -57,10 +57,10 @@ function fixRange(editor: Editor, rawRange: Range, split = '/'): Range {
 }
 
 export function getDetail(editor: Editor, range: Range, option: DetailInput) {
-	slashSelection.set(() => {
+	slashState.selection = () => {
 		editor.chain().focus().deleteRange(fixRange(editor, range)).run();
-	});
-	slashDetail.set(option);
+	};
+	slashState.detail = option;
 }
 
 export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
@@ -286,31 +286,33 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 		return {
 			onStart: (props: SuggestionProps<SlashGroup>) => {
 				const { editor, range } = props;
-				slashProps.set({ editor, range });
-				slashVisible.set(true);
-				slashItems.set(props.items);
-				slashDetail.set(null);
+				setSlashProps({ editor, range });
+				slashState.visible = true;
+				slashState.selectedIndex = 0;
+				setSlashItems(props.items);
+				slashState.detail = null;
 
 				const location = props.clientRect?.();
 				if (location) {
-					slashLocation.set({ x: location.x, y: location.y, height: location.height });
+					setSlashLocation({ x: location.x, y: location.y, height: location.height });
 				}
 			},
 
 			onUpdate(props: SuggestionProps<SlashGroup>) {
-				slashItems.set(props.items);
+				setSlashProps({ editor: props.editor, range: props.range });
+				setSlashItems(props.items);
 			},
 
 			onKeyDown(props: SuggestionKeyDownProps) {
 				if (props.event.key === 'Escape') {
-					slashVisible.set(false);
+					slashState.visible = false;
 					return true;
 				}
 				return false;
 			},
 
 			onExit() {
-				slashVisible.set(false);
+				slashState.visible = false;
 			}
 		};
 	}

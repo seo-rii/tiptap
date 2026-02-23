@@ -2,35 +2,29 @@
 	import { Button, IconButton, Input, List, OneLine, TwoLine } from 'nunui';
 	import { getContext } from 'svelte';
 	import {
-		slashVisible,
-		slashItems,
-		slashLocation,
-		slashProps,
-		slashDetail,
-		slashSelection
-	} from '../plugin/command/stores';
+		isSlashGroup,
+		isSlashItem,
+		slashState,
+		type SlashGroup,
+		type SlashItem
+	} from '../plugin/command/stores.svelte';
 	import { fly, slide } from 'svelte/transition';
 	import { quartOut } from 'svelte/easing';
 	import i18n from '$lib/i18n';
-	import type { SlashDetail, SlashGroup, SlashItem } from '../plugin/command/stores';
 
 	const editor = getContext<{ v: any }>('editor');
 	const tiptap = $derived(editor.v);
-	let { selectedIndex = 0 } = $props();
 
 	let height = $state(0);
 	let input = $state(''),
 		focus = $state<HTMLInputElement | HTMLTextAreaElement | undefined>(undefined);
 
-	const isSlashGroup = (item: SlashItem | SlashGroup): item is SlashGroup => 'list' in item;
-	const isSlashItem = (item: SlashItem | SlashGroup): item is SlashItem => 'command' in item;
-
-	const emojiItems = $derived($slashItems.filter(isSlashItem));
-	const groupedItems = $derived($slashItems.filter(isSlashGroup));
+	const emojiItems = $derived(slashState.items.filter(isSlashItem));
+	const groupedItems = $derived(slashState.items.filter(isSlashGroup));
 
 	function runCommand(item: SlashItem | undefined) {
 		if (!item) return;
-		const { editor, range } = $slashProps;
+		const { editor, range } = slashState.props;
 		if (!editor || !range) return;
 
 		item.command({ editor, range });
@@ -38,58 +32,53 @@
 	}
 
 	function runCodeCommand(input?: string) {
-		if (
-			!$slashDetail ||
-			$slashDetail === 'emoji' ||
-			!('type' in $slashDetail) ||
-			$slashDetail.type !== 'code'
-		)
-			return;
-		$slashSelection?.();
-		$slashDetail.handler(input);
+		const detail = slashState.detail;
+		if (!detail || detail === 'emoji' || !('type' in detail) || detail.type !== 'code') return;
+		slashState.selection?.();
+		detail.handler(input);
 	}
 
 	function runDetailCommand() {
-		if (
-			!$slashDetail ||
-			$slashDetail === 'emoji' ||
-			('type' in $slashDetail && $slashDetail.type === 'code')
-		)
-			return;
+		const detail = slashState.detail;
+		if (!detail || detail === 'emoji' || ('type' in detail && detail.type === 'code')) return;
 
-		$slashSelection?.();
-		$slashDetail.handler(input);
+		slashState.selection?.();
+		detail.handler(input);
 	}
 
 	$effect(() => {
-		if ($slashVisible) input = '';
+		if (slashState.visible) input = '';
 	});
 	$effect(() => {
 		focus;
 		setTimeout(() => focus?.focus?.(), 100);
 	});
+
 </script>
 
 <svelte:window bind:innerHeight={height} />
 
-{#if $slashVisible}
-	<div class="scrim" onclick={() => ($slashVisible = false)}></div>
+{#if slashState.visible}
+	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+	<div class="scrim" onclick={() => (slashState.visible = false)}></div>
 	<main
-		style="left: {$slashLocation.x}px; top: {$slashLocation.y + $slashLocation.height + 384 >
+		style="left: {slashState.location.x}px; top: {slashState.location.y +
+			slashState.location.height +
+			384 >
 		height
-			? $slashLocation.y - $slashLocation.height - 384
-			: $slashLocation.y + $slashLocation.height}px;"
+			? slashState.location.y - slashState.location.height - 384
+			: slashState.location.y + slashState.location.height}px;"
 		transition:fly={{ y: 10, duration: 200, easing: quartOut }}
 	>
-		{#if $slashDetail === 'emoji'}
+		{#if slashState.detail === 'emoji'}
 			<div class="list">
-				<List>
-					{#each emojiItems as item, i (item.title)}
-						<div transition:slide={{ duration: 400, easing: quartOut }}>
-							<OneLine
-								onclick={() => runCommand(item)}
-								title={item.title}
-								active={selectedIndex === i}
+					<List>
+						{#each emojiItems as item, i (item.title)}
+							<div transition:slide={{ duration: 400, easing: quartOut }}>
+								<OneLine
+									onclick={() => runCommand(item)}
+									title={item.title}
+								active={slashState.selectedIndex === i}
 							/>
 						</div>
 					{/each}
@@ -100,27 +89,27 @@
 					{/if}
 				</List>
 			</div>
-		{:else if $slashDetail && 'type' in $slashDetail && $slashDetail.type === 'code'}
+		{:else if slashState.detail && 'type' in slashState.detail && slashState.detail.type === 'code'}
 			<div class="detail">
 				<header>
-					<IconButton icon="arrow_back" onclick={() => ($slashDetail = null)} />
+					<IconButton icon="arrow_back" onclick={() => (slashState.detail = null)} />
 					<div class="title">{i18n('insertCode')}</div>
 				</header>
 				<div>
 					<Button small onclick={() => runCodeCommand(undefined)}>{i18n('auto')}</Button>
-					{#each ['cpp', 'python', 'java'] as lang}
+					{#each ['cpp', 'python', 'java'] as lang (lang)}
 						<Button small outlined onclick={() => runCodeCommand(lang)}>{lang}</Button>
 					{/each}
 				</div>
 			</div>
-		{:else if $slashDetail && !('type' in $slashDetail)}
+		{:else if slashState.detail && !('type' in slashState.detail)}
 			<div class="detail">
 				<header>
-					<IconButton icon="arrow_back" onclick={() => ($slashDetail = null)} />
-					<div class="title">{$slashDetail.title}</div>
+					<IconButton icon="arrow_back" onclick={() => (slashState.detail = null)} />
+					<div class="title">{slashState.detail.title}</div>
 				</header>
 				<Input
-					placeholder={$slashDetail.placeholder}
+					placeholder={slashState.detail.placeholder}
 					block
 					bind:value={input}
 					bind:input={focus}
@@ -133,15 +122,11 @@
 						small
 						onclick={() => {
 							input = '';
-							$slashDetail = null;
+							slashState.detail = null;
 						}}
 						>{i18n('cancel')}
 					</Button>
-					<Button
-						tabindex={0}
-						transparent
-						small
-						onclick={runDetailCommand}
+					<Button tabindex={0} transparent small onclick={runDetailCommand}
 						>{i18n('insert')}
 					</Button>
 				</footer>
@@ -156,16 +141,16 @@
 						<div class="section" transition:slide={{ duration: 400, easing: quartOut }}>
 							{group.section}
 						</div>
-						<div transition:slide={{ duration: 400, easing: quartOut }}>
-							{#each group.list as item, i (item.title)}
-								<div transition:slide={{ duration: 400, easing: quartOut }}>
-									<TwoLine
-										onmouseenter={() => (selectedIndex = i + lastCount)}
-										onclick={() => runCommand(item)}
+							<div transition:slide={{ duration: 400, easing: quartOut }}>
+								{#each group.list as item, i (item.title)}
+									<div transition:slide={{ duration: 400, easing: quartOut }}>
+										<TwoLine
+											onmouseenter={() => (slashState.selectedIndex = i + lastCount)}
+											onclick={() => runCommand(item)}
 										icon={item.icon}
 										title={item.title}
 										subtitle={item.subtitle || ''}
-										active={selectedIndex === i + lastCount}
+										active={slashState.selectedIndex === i + lastCount}
 									/>
 								</div>
 							{/each}

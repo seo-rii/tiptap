@@ -5,7 +5,11 @@
 	import Bubble from '$lib/tiptap/Bubble.svelte';
 	import Floating from '$lib/tiptap/Floating.svelte';
 	import Command from '$lib/tiptap/Command.svelte';
-	import { slashItems, slashProps, slashVisible } from '$lib/plugin/command/stores';
+	import {
+		countSlashItems,
+		flattenSlashItems,
+		slashState
+	} from '$lib/plugin/command/stores.svelte';
 	import i18n from '$lib/i18n';
 	import type { UploadFn } from '$lib/plugin/image/dragdrop';
 	import { fallbackUpload } from '$lib/plugin/image/dragdrop';
@@ -150,30 +154,29 @@
 		tiptap.v?.commands?.setContent?.(body);
 	});
 
-	let selectedIndex = $state(0);
 	$effect(() => {
-		if (!slashVisible) selectedIndex = 0;
+		if (!slashState.visible) slashState.selectedIndex = 0;
 	});
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (!$slashVisible) return;
-		let count = $slashItems.length;
-		if (($slashItems[0] as any)?.list)
-			count = $slashItems.reduce((acc, item) => acc + (item as any).list.length, 0);
+		if (!slashState.visible) return false;
+		const count = countSlashItems();
+		if (!count) return false;
+
 		if (event.key === 'ArrowUp') {
 			event.preventDefault();
-			selectedIndex = (selectedIndex + count - 1) % count;
+			slashState.selectedIndex = (slashState.selectedIndex + count - 1) % count;
 			return true;
 		}
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
-			selectedIndex = (selectedIndex + 1) % count;
+			slashState.selectedIndex = (slashState.selectedIndex + 1) % count;
 			return true;
 		}
 
 		if (event.key === 'Enter') {
 			event.preventDefault();
-			selectItem(selectedIndex);
+			selectItem(slashState.selectedIndex);
 			return true;
 		}
 
@@ -181,13 +184,10 @@
 	}
 
 	function selectItem(index: number) {
-		const item = ($slashItems[0] as any)?.list
-			? $slashItems.map((i: any) => i.list).flat()[index]
-			: $slashItems[index];
-		if (item) {
-			let range = $slashProps.range;
-			item.command({ editor: tiptap.v, range });
-		}
+		const item = flattenSlashItems()[index];
+		const { editor, range } = slashState.props;
+		if (!item || !editor || !range) return;
+		item.command({ editor, range });
 	}
 </script>
 
@@ -208,7 +208,7 @@
 		{/if}
 	</div>
 	{#if editable}
-		<Command {selectedIndex} />
+		<Command />
 		<Floating />
 	{/if}
 	{#if editable || mark}

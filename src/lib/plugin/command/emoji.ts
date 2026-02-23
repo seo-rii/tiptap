@@ -1,4 +1,10 @@
-import { slashVisible, slashItems, slashLocation, slashProps, slashDetail } from './stores';
+import {
+	setSlashItems,
+	setSlashLocation,
+	setSlashProps,
+	slashState,
+	type SlashItem
+} from './stores.svelte';
 import { PluginKey } from '@tiptap/pm/state';
 import Suggestion, {
 	type SuggestionKeyDownProps,
@@ -6,7 +12,6 @@ import Suggestion, {
 	type SuggestionProps
 } from '@tiptap/suggestion';
 import type { Editor, Range } from '@tiptap/core';
-import type { SlashItem } from './stores';
 
 // @ts-ignore
 import emojis from 'emojis-list';
@@ -76,31 +81,33 @@ export const emoji: Omit<SuggestionOptions<SlashItem>, 'editor'> = {
 		return {
 			onStart: (props: SuggestionProps<SlashItem>) => {
 				const { editor, range } = props;
-				slashProps.set({ editor, range });
-				slashVisible.set(true);
-				slashItems.set(props.items);
-				slashDetail.set('emoji');
+				setSlashProps({ editor, range });
+				slashState.visible = true;
+				slashState.selectedIndex = 0;
+				setSlashItems(props.items);
+				slashState.detail = 'emoji';
 
 				const location = props.clientRect?.();
 				if (location) {
-					slashLocation.set({ x: location.x, y: location.y, height: location.height });
+					setSlashLocation({ x: location.x, y: location.y, height: location.height });
 				}
 			},
 
 			onUpdate(props: SuggestionProps<SlashItem>) {
-				slashItems.set(props.items);
+				setSlashProps({ editor: props.editor, range: props.range });
+				setSlashItems(props.items);
 			},
 
 			onKeyDown(props: SuggestionKeyDownProps) {
 				if (props.event.key === 'Escape') {
-					slashVisible.set(false);
+					slashState.visible = false;
 					return true;
 				}
 				return false;
 			},
 
 			onExit() {
-				slashVisible.set(false);
+				slashState.visible = false;
 			}
 		};
 	}
