@@ -2,11 +2,39 @@
 	import { FloatingMenu } from 'svelte-tiptap';
 	import { getContext } from 'svelte';
 	import { IconButton, List, OneLine, Paper } from 'nunui';
+	import type { CommandProps } from '@tiptap/core';
+	import { NodeSelection } from '@tiptap/pm/state';
 	import ToolbarButton from '$lib/tiptap/ToolbarButton.svelte';
 	import i18n from '$lib/i18n';
 
 	const editor = getContext<{ v: any }>('editor');
 	const tiptap = $derived(editor.v);
+
+	function insertMathInline() {
+		tiptap
+			.chain()
+			.focus()
+			.command(({ state, tr, dispatch }: CommandProps) => {
+				const { math_inline: mathInline } = state.schema.nodes;
+				if (!mathInline) return false;
+
+				const fromSelection = state.selection.$from;
+				const index = fromSelection.index();
+				if (!fromSelection.parent.canReplaceWith(index, index, mathInline)) return false;
+
+				const insertedPosition = fromSelection.pos;
+				const mathNode = mathInline.create({});
+				const nextTr = tr.replaceSelectionWith(mathNode);
+				nextTr.setSelection(NodeSelection.create(nextTr.doc, insertedPosition));
+				dispatch?.(nextTr);
+				return true;
+			})
+			.run();
+	}
+
+	function insertCodeBlock() {
+		tiptap.chain().focus().setCodeBlock({ language: null }).run();
+	}
 </script>
 
 {#if tiptap}
@@ -52,18 +80,10 @@
 			<ToolbarButton
 				icon="functions"
 				handler={() => {
-					const end = tiptap.state.selection.$to.pos;
-					tiptap
-						.chain()
-						.focus()
-						.insertContent({
-							type: 'math_inline'
-						})
-						.insertContent(' ')
-						.run();
+					insertMathInline();
 				}}
 			/>
-			<ToolbarButton icon="code" prop="code" />
+			<ToolbarButton icon="code" handler={insertCodeBlock} />
 		</main>
 	</FloatingMenu>
 {/if}
