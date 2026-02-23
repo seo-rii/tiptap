@@ -1,10 +1,21 @@
 import { Table as BuiltInTable } from '@tiptap/extension-table';
 import { Plugin } from 'prosemirror-state';
 import { tableEditing, columnResizing } from 'prosemirror-tables';
-import { Decoration, DecorationSet } from 'prosemirror-view';
+import { Decoration, DecorationSet, type EditorView } from 'prosemirror-view';
 import deleteTable from './deleteTable';
 
 import './style.css';
+
+const resolveTableElement = (view: EditorView | null | undefined, pos: number) => {
+	if (!view) return null;
+
+	const dom = view.nodeDOM(pos);
+	if (dom instanceof HTMLTableElement) return dom;
+	if (!(dom instanceof HTMLElement)) return null;
+
+	const table = dom.querySelector('table');
+	return table instanceof HTMLTableElement ? table : null;
+};
 
 export default BuiltInTable.extend({
 	renderHTML() {
@@ -20,8 +31,6 @@ export default BuiltInTable.extend({
 	},
 
 	addProseMirrorPlugins() {
-		const { isEditable } = this.editor;
-
 		return [
 			tableEditing(),
 			columnResizing({}),
@@ -30,19 +39,20 @@ export default BuiltInTable.extend({
 					decorations: (state) => {
 						const { doc } = state;
 						const decorations: Decoration[] = [];
-						let index = 0;
+						const isEditable = this.editor.isEditable;
+						const view = this.editor.view;
 
 						doc.descendants((node, pos) => {
 							if (node.type.name !== this.name) return;
 
-							const elements = document.getElementsByClassName('as-table');
-							const table = elements[index];
-
+							const table = resolveTableElement(view, pos);
 							if (!table) return;
-							if (!isEditable) table.classList.add('is-readonly');
+							table.classList.toggle('is-readonly', !isEditable);
 
-							const element = table.parentElement;
-							const shadowRight = !!(element && element.scrollWidth > element.clientWidth);
+							const scrollable = table.parentElement;
+							const shadowRight = !!(
+								scrollable instanceof HTMLElement && scrollable.scrollWidth > scrollable.clientWidth
+							);
 							if (shadowRight)
 								decorations.push(
 									Decoration.widget(pos + 1, () => {
@@ -51,7 +61,6 @@ export default BuiltInTable.extend({
 										return shadow;
 									})
 								);
-							index++;
 						});
 
 						return DecorationSet.create(doc, decorations);

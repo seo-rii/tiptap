@@ -20,13 +20,11 @@ export default BuiltInTableHeader.extend({
 	},
 
 	addProseMirrorPlugins() {
-		const { isEditable } = this.editor;
-
 		return [
 			new Plugin({
 				props: {
 					decorations: (state) => {
-						if (!isEditable) return DecorationSet.empty;
+						if (!this.editor.isEditable) return DecorationSet.empty;
 
 						const { doc, selection } = state;
 						const decorations: Decoration[] = [];
