@@ -36,6 +36,7 @@
 		sanitize?: Record<string, any>;
 		colors?: string[];
 		bubble?: any;
+		bubbleDocked?: boolean;
 		preloader?: any;
 		crossorigin?: 'anonymous' | 'use-credentials';
 		codeBlockLanguageLabels?: Record<string, string>;
@@ -65,6 +66,7 @@
 			'#ab47bc' //purple
 		],
 		bubble = null,
+		bubbleDocked = false,
 		preloader,
 		crossorigin = 'anonymous',
 		codeBlockLanguageLabels = {}
@@ -217,6 +219,11 @@
 </script>
 
 <main class:fullscreen class:editable {style}>
+	{#if bubbleDocked && (editable || mark)}
+		<Bubble {colors} {editable} override={bubble} docked={bubbleDocked}>
+			<Render it={bubble} />
+		</Bubble>
+	{/if}
 	<div class="wrapper">
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div bind:this={element} class="target" onkeydown={handleKeydown}></div>
@@ -236,8 +243,8 @@
 		<Command />
 		<Floating />
 	{/if}
-	{#if editable || mark}
-		<Bubble {colors} {editable} override={bubble}>
+	{#if !bubbleDocked && (editable || mark)}
+		<Bubble {colors} {editable} override={bubble} docked={bubbleDocked}>
 			<Render it={bubble} />
 		</Bubble>
 	{/if}
@@ -291,7 +298,9 @@
 
 	.editable :global(.ProseMirror-selectednode img) {
 		transition: all 0.2s ease-in-out;
-		filter: drop-shadow(0 0 0.75rem var(--primary-light13));
+		outline: 3px solid var(--primary);
+		outline-offset: 2px;
+		filter: none;
 	}
 
 	.editable :global(.iframe-wrapper.ProseMirror-selectednode) {
