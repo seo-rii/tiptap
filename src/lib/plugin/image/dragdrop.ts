@@ -1,5 +1,6 @@
 import { Plugin } from 'prosemirror-state';
 import type { EditorView } from 'prosemirror-view';
+import { insertUploadSkeleton } from '$lib/plugin/upload/skeleton';
 
 export type UploadFn = (image: File) => Promise<string>;
 export const fallbackUpload = async (image: File) => URL.createObjectURL(image);
@@ -88,16 +89,35 @@ export const dropImagePlugin = () => {
 
 						if (item.type.indexOf('image') === 0) {
 							event.preventDefault();
+							const skeleton = insertUploadSkeleton(
+								{
+									state: view.state,
+									view
+								},
+								{
+									kind: 'image',
+									height: 220
+								}
+							);
 
 							if (upload && image) {
-								upload(image).then((src) => {
-									const node = schema.nodes.image.create({
-										src: src
+								upload(image)
+									.then((src) => {
+										if (skeleton) {
+											skeleton.replaceWith({
+												type: 'image',
+												attrs: { src }
+											});
+										} else {
+											const node = schema.nodes.image.create({ src });
+											const transaction = view.state.tr.replaceSelectionWith(node);
+											view.dispatch(transaction);
+										}
+										releaseObjectUrlOnImageSettled(view, src);
+									})
+									.catch(() => {
+										skeleton?.remove();
 									});
-									const transaction = view.state.tr.replaceSelectionWith(node);
-									view.dispatch(transaction);
-									releaseObjectUrlOnImageSettled(view, src);
-								});
 							}
 						} else {
 							const reader = new FileReader();
@@ -143,20 +163,50 @@ export const dropImagePlugin = () => {
 
 					images.forEach(async (image) => {
 						const reader = new FileReader();
+						const skeleton = insertUploadSkeleton(
+							{
+								state: view.state,
+								view
+							},
+							{
+								kind: 'image',
+								height: 220,
+								at: coordinates.pos
+							}
+						);
 
 						if (upload) {
-							const src = await upload(image);
-							const node = schema.nodes.image.create({
-								src
-							});
-							const transaction = view.state.tr.insert(coordinates.pos, node);
-							view.dispatch(transaction);
-							releaseObjectUrlOnImageSettled(view, src);
+							try {
+								const src = await upload(image);
+								if (skeleton) {
+									skeleton.replaceWith({
+										type: 'image',
+										attrs: { src }
+									});
+								} else {
+									const node = schema.nodes.image.create({ src });
+									const transaction = view.state.tr.insert(coordinates.pos, node);
+									view.dispatch(transaction);
+								}
+								releaseObjectUrlOnImageSettled(view, src);
+							} catch {
+								skeleton?.remove();
+							}
 						} else {
 							reader.onload = (readerEvent) => {
-								const node = schema.nodes.image.create({
-									src: readerEvent.target?.result
-								});
+								const src = readerEvent.target?.result;
+								if (typeof src !== 'string') {
+									skeleton?.remove();
+									return;
+								}
+								if (skeleton) {
+									skeleton.replaceWith({
+										type: 'image',
+										attrs: { src }
+									});
+									return;
+								}
+								const node = schema.nodes.image.create({ src });
 								const transaction = view.state.tr.insert(coordinates.pos, node);
 								view.dispatch(transaction);
 							};

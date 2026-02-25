@@ -19,6 +19,7 @@
 	} from '$lib/i18n';
 	import type { UploadFn } from '$lib/plugin/image/dragdrop';
 	import { fallbackUpload } from '$lib/plugin/image/dragdrop';
+	import MediaResize, { type ResizeOptions } from '$lib/plugin/resize';
 	import { Render } from 'nunui';
 
 	type Props = {
@@ -40,6 +41,7 @@
 		preloader?: any;
 		crossorigin?: 'anonymous' | 'use-credentials';
 		codeBlockLanguageLabels?: Record<string, string>;
+		resize?: boolean | ResizeOptions;
 	};
 
 	let {
@@ -69,10 +71,19 @@
 		bubbleDocked = false,
 		preloader,
 		crossorigin = 'anonymous',
-		codeBlockLanguageLabels = {}
+		codeBlockLanguageLabels = {},
+		resize = true
 	}: Props = $props();
 
 	const scopedI18n: I18nTranslate = (...args) => translateWithLocale(locale, ...args);
+	const resizeDataAttrs = [
+		'data-resize-handler',
+		'data-resize-target',
+		'data-resize-min-height',
+		'data-resize-max-height',
+		'data-bubble-menu',
+		'data-hide-bubble-menu'
+	];
 
 	const san = (body: string) =>
 		sanitizeHtml(body || '', {
@@ -87,18 +98,26 @@
 				'embed',
 				'mark',
 				'code',
+				'tiptap-upload-skeleton',
 				...(sanitize.allowedTags || [])
 			]),
 			allowedStyles: '*' as any,
 			allowedAttributes: {
 				'*': ['style', 'class'],
 				a: ['href', 'name', 'target'],
-				img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading'],
-				iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
+				img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading', ...resizeDataAttrs],
+				iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen', ...resizeDataAttrs],
 				th: ['colwidth', 'colspan', 'rowspan'],
 				td: ['colwidth', 'colspan', 'rowspan'],
-				'lite-youtube': ['videoid', 'params', 'nocookie', 'title', 'provider'],
-				embed: ['src', 'type', 'frameborder', 'allowfullscreen'],
+				'lite-youtube': ['videoid', 'params', 'nocookie', 'title', 'provider', ...resizeDataAttrs],
+				embed: ['src', 'type', 'frameborder', 'allowfullscreen', ...resizeDataAttrs],
+				'tiptap-upload-skeleton': [
+					'data-upload-id',
+					'data-upload-kind',
+					'data-upload-height',
+					'data-bubble-menu',
+					'data-hide-bubble-menu'
+				],
 				mark: ['style', 'data-color'],
 				code: ['class'],
 				...(sanitize.allowedAttributes || [])
@@ -135,6 +154,15 @@
 			([{ default: tt }]) => {
 				if (!untrack(() => mounted)) return;
 				const editorPlaceholder = placeholder ?? scopedI18n('placeholder');
+				const optionPlugins = Array.isArray(options.plugins)
+					? [...options.plugins]
+					: options.plugins
+						? [options.plugins]
+						: [];
+				if (resize) {
+					const resizeOptions = typeof resize === 'object' ? resize : {};
+					optionPlugins.unshift(MediaResize.configure(resizeOptions));
+				}
 				tiptap.v = ref = tt(element, r, {
 					placeholder: editorPlaceholder,
 					editable,
@@ -144,7 +172,8 @@
 					},
 					crossorigin,
 					codeBlockLanguageLabels,
-					...options
+					...options,
+					plugins: optionPlugins
 				});
 				tiptap.v.on('update', ({ editor: tiptap }: any) => {
 					let content = tiptap.getHTML(),
@@ -309,6 +338,53 @@
 
 	.editable :global(lite-youtube.ProseMirror-selectednode) {
 		outline: 3px solid var(--primary);
+	}
+
+	.editable :global(.tiptap-media-resize-anchor) {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		margin: 6px 0 2px;
+		line-height: 0;
+		pointer-events: none;
+	}
+
+	.editable :global(.tiptap-media-resize-handle) {
+		appearance: none;
+		-webkit-appearance: none;
+		display: block;
+		width: 42px;
+		height: 8px;
+		margin: 0;
+		padding: 0;
+		border: 1px solid var(--primary-light3, rgba(120, 120, 120, 0.45));
+		border-radius: 999px;
+		background: var(--primary-light6, rgba(120, 120, 120, 0.2));
+		cursor: ns-resize;
+		pointer-events: auto;
+		transition:
+			background-color 0.15s ease,
+			border-color 0.15s ease,
+			transform 0.15s ease;
+	}
+
+	.editable :global(.tiptap-media-resize-handle:hover),
+	.editable :global(.tiptap-media-resize-handle:focus-visible) {
+		background: var(--primary-light4, rgba(120, 120, 120, 0.35));
+		border-color: var(--primary-light2, rgba(100, 100, 100, 0.55));
+		outline: none;
+	}
+
+	.editable :global(.tiptap-media-resize-handle:active) {
+		transform: translateY(1px);
+	}
+
+	.editable :global(.tiptap-media-resize-proxy) {
+		width: 100%;
+		border-radius: 12px;
+		background: var(--primary-light4, rgba(120, 120, 120, 0.35));
+		opacity: 0.55;
+		pointer-events: none;
 	}
 
 	div > :global(div) {

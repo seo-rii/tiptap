@@ -20,7 +20,7 @@ declare module '@tiptap/core' {
 	}
 }
 
-const videoPlayerStaticAttributes = { nocookie: true };
+const videoPlayerStaticAttributes = { nocookie: true, 'data-bubble-menu': 'false' };
 
 export default Node.create<VideoPlayerOptions>({
 	name: 'lite-youtube',

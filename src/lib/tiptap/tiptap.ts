@@ -24,6 +24,7 @@ import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Iframe from '$lib/plugin/iframe';
 import Embed from '$lib/plugin/embed';
+import UploadSkeleton from '$lib/plugin/upload/skeleton';
 // @ts-ignore
 import { MathInline, MathBlock } from '@seorii/prosemirror-math/tiptap';
 import Youtube from '$lib/plugin/youtube';
@@ -289,6 +290,7 @@ const extensions = (
 	Indent,
 	Color,
 	TextStyle,
+	UploadSkeleton,
 	Iframe,
 	Embed,
 	Code.extend({

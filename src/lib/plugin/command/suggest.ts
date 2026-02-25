@@ -18,6 +18,7 @@ import {
 	releaseObjectUrlOnImageSettled,
 	type UploadFn
 } from '$lib/plugin/image/dragdrop';
+import { insertUploadSkeleton } from '$lib/plugin/upload/skeleton';
 import { PluginKey, TextSelection } from '@tiptap/pm/state';
 import type { Editor, Range } from '@tiptap/core';
 import Suggestion, {
@@ -200,11 +201,27 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 								const file = input.files[0];
 								if (!file) return;
 
-								const upload =
-									(window as WindowWithTipTapGlobals).__image_uploader ?? fallbackUpload;
-								const src = await upload(file);
-								editor.chain().focus().deleteRange(range).setImage({ src }).run();
-								releaseObjectUrlOnImageSettled(editor.view, src);
+								const skeleton = insertUploadSkeleton(editor, {
+									kind: 'image',
+									height: 220
+								});
+
+								try {
+									const upload =
+										(window as WindowWithTipTapGlobals).__image_uploader ?? fallbackUpload;
+									const src = await upload(file);
+									if (skeleton) {
+										skeleton.replaceWith({
+											type: 'image',
+											attrs: { src }
+										});
+									} else {
+										editor.chain().focus().setImage({ src }).run();
+									}
+									releaseObjectUrlOnImageSettled(editor.view, src);
+								} catch {
+									skeleton?.remove();
+								}
 							};
 							input.click();
 						}

@@ -15,7 +15,16 @@
 	let docked = $state(false);
 </script>
 
-<TipTap bind:body {editable} mark bubbleDocked={docked} />
+<TipTap
+	bind:body
+	{editable}
+	mark
+	bubbleDocked={docked}
+	imageUpload={async (image) => {
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		return URL.createObjectURL(image);
+	}}
+/>
 <br />
 <Checkbox bind:checked={editable} label="editable" />
 <br />

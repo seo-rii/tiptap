@@ -51,7 +51,7 @@ export default Node.create<IframeOptions>({
 	renderHTML({ HTMLAttributes }) {
 		return [
 			'div',
-			this.options.HTMLAttributes,
+			mergeAttributes(this.options.HTMLAttributes, { 'data-bubble-menu': 'false' }),
 			[
 				'iframe',
 				mergeAttributes(HTMLAttributes, { credentialless: true, crossorigin: 'anonymous' })

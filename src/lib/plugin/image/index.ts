@@ -22,7 +22,7 @@ export default (crossorigin = 'anonymous') =>
 			const style = HTMLAttributes.style;
 			return [
 				'figure',
-				{ style },
+				{ style, 'data-bubble-menu': 'false' },
 				['img', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)]
 			];
 		},

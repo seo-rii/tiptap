@@ -59,7 +59,7 @@ export default Node.create<EmbedOptions>({
 	renderHTML({ HTMLAttributes }) {
 		return [
 			'div',
-			this.options.HTMLAttributes,
+			mergeAttributes(this.options.HTMLAttributes, { 'data-bubble-menu': 'false' }),
 			['embed', mergeAttributes(HTMLAttributes, { credentialless: true, crossorigin: 'anonymous' })]
 		];
 	},
