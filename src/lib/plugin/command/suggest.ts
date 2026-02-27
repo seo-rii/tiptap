@@ -297,6 +297,30 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 						}
 					},
 					{
+						icon: 'view_column_2',
+						title: i18n('twoColumns'),
+						subtitle: i18n('twoColumnsInfo'),
+						keywords: createKeywords(
+							['twoColumns', 'twoColumnsInfo'],
+							['2 columns', 'two columns', 'notion']
+						),
+						command: ({ editor, range }) => {
+							editor.chain().focus().deleteRange(fixRange(editor, range)).setTwoColumns().run();
+						}
+					},
+					{
+						icon: 'view_week',
+						title: i18n('threeColumns'),
+						subtitle: i18n('threeColumnsInfo'),
+						keywords: createKeywords(
+							['threeColumns', 'threeColumnsInfo'],
+							['3 columns', 'three columns', 'notion']
+						),
+						command: ({ editor, range }) => {
+							editor.chain().focus().deleteRange(fixRange(editor, range)).setThreeColumns().run();
+						}
+					},
+					{
 						icon: 'format_quote',
 						title: i18n('blockquote'),
 						subtitle: i18n('blockquoteInfo'),

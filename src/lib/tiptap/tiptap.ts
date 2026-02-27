@@ -29,6 +29,7 @@ import UploadSkeleton from '$lib/plugin/upload/skeleton';
 import { MathInline, MathBlock } from '@seorii/prosemirror-math/tiptap';
 import Youtube from '$lib/plugin/youtube';
 import Placeholder from '@tiptap/extension-placeholder';
+import columns from '$lib/plugin/columns';
 
 import command from '$lib/plugin/command/suggest';
 import emoji from '$lib/plugin/command/emoji';
@@ -281,6 +282,7 @@ const extensions = (
 	orderedlist,
 	MathInline,
 	MathBlock,
+	...columns,
 	table,
 	tableHeader,
 	tableRow,

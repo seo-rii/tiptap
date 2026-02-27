@@ -1,0 +1,37 @@
+.tiptap-columns {
+	display: grid;
+	gap: 12px;
+	margin: 12px 0;
+}
+
+.tiptap-columns.columns-2 {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tiptap-columns.columns-3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.tiptap-column {
+	min-width: 0;
+	padding: 10px 12px;
+	border: 0;
+	border-radius: 10px;
+	background: transparent;
+}
+
+.tiptap-column > :first-child {
+	margin-top: 0;
+}
+
+.tiptap-column > :last-child {
+	margin-bottom: 0;
+}
+
+.editable .tiptap-column {
+	border: 1px dashed var(--primary-light3, rgba(112, 112, 112, 0.35));
+}
+
+.editable .tiptap-column:hover {
+	border-color: var(--primary-light7, rgba(112, 112, 112, 0.65));
+}
