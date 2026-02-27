@@ -410,6 +410,7 @@
 		& :global(img) {
 			transition: all 0.2s ease-in-out;
 			max-width: 100%;
+			object-fit: contain;
 			border-radius: 12px;
 			position: relative;
 		}

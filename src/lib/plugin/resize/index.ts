@@ -201,7 +201,8 @@ function buildResizeAttrs(
 
 	if (kind === 'image') {
 		const roundedWidth = String(Math.max(1, Math.round(height * imageRatio)));
-		return { ...attrs, width: roundedWidth, height: roundedHeight };
+		// Keep image responsive by storing width only; fixed height causes ratio distortion on narrow layouts.
+		return { ...attrs, width: roundedWidth, height: null };
 	}
 
 	if (kind === 'iframe' || kind === 'embed') {
