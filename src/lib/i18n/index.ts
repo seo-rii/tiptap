@@ -1,14 +1,30 @@
 import enUs from './en-us/index';
 import koKr from './ko-kr/index';
+import es from './es/index';
+import ja from './ja/index';
+import zhHans from './zh-hans/index';
+import zhHant from './zh-hant/index';
 
-const locales = [enUs, koKr] as const;
+const locales = [enUs, koKr, es, ja, zhHans, zhHant] as const;
 type Locale = (typeof locales)[number];
 export type LocaleInput = string | Locale | null | undefined;
 export type I18nTranslate = (...args: string[]) => string;
 export const I18N_CONTEXT = Symbol('tiptap-i18n');
 
-const normalizeLocaleCode = (value: string | null | undefined): string =>
-	(value ?? '').trim().replace(/_/g, '-').toLowerCase();
+const normalizeLocaleCode = (value: string | null | undefined): string => {
+	const normalized = (value ?? '').trim().replace(/_/g, '-').toLowerCase();
+	if (!normalized) return '';
+	if (!normalized.startsWith('zh')) return normalized;
+	if (
+		normalized.includes('hant') ||
+		normalized.startsWith('zh-tw') ||
+		normalized.startsWith('zh-hk') ||
+		normalized.startsWith('zh-mo')
+	) {
+		return 'zh-hant';
+	}
+	return 'zh-hans';
+};
 
 const findLocale = (localeList: readonly Locale[], language: string): Locale | null => {
 	const normalized = normalizeLocaleCode(language);
