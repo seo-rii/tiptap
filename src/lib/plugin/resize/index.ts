@@ -275,11 +275,27 @@ function buildResizeAttrs(
 		return { ...attrs, width: roundedWidth, height: null };
 	}
 
-	if (kind === 'iframe' || kind === 'embed') {
-		return { ...attrs, width: attrs.width || '100%', height: roundedHeight, aspectRatio };
+	if (kind === 'iframe') {
+		if (aspectRatio) {
+			// A fixed height prevents CSS aspect-ratio from taking effect.
+			return { ...attrs, width: attrs.width || '100%', height: null, aspectRatio };
+		}
+		return { ...attrs, width: attrs.width || '100%', height: roundedHeight, aspectRatio: null };
 	}
 
-	return { ...attrs, height: roundedHeight, aspectRatio };
+	if (kind === 'embed') {
+		if (aspectRatio) {
+			// Keep PDF/embed responsive with CSS aspect-ratio when a preset is selected.
+			return { ...attrs, width: attrs.width || '100%', height: null, aspectRatio };
+		}
+		return { ...attrs, width: attrs.width || '100%', height: roundedHeight, aspectRatio: null };
+	}
+
+	return { ...attrs, height: roundedHeight, aspectRatio: null };
+}
+
+function canUseAspectRatioPreset(kind: ResizeKind) {
+	return kind === 'iframe' || kind === 'embed';
 }
 
 function createResizeHandleDecoration(
@@ -302,7 +318,7 @@ function createResizeHandleDecoration(
 			button.setAttribute('aria-label', 'Resize media height (click for aspect ratio)');
 			anchor.append(button);
 
-			if (resizeMeta.kind !== 'image') {
+			if (canUseAspectRatioPreset(resizeMeta.kind)) {
 				const selectedAspectRatio = normalizeAspectRatioAttr(node.attrs.aspectRatio);
 				const toolbar = document.createElement('div');
 				toolbar.className = 'tiptap-media-aspect-ratio-toolbar';
@@ -396,9 +412,19 @@ export default Extension.create<ResizeOptions>({
 					},
 					height: {
 						default: '600',
-						parseHTML: (element) =>
-							normalizeNumericAttr(element.getAttribute('height') || element.style.height) || '600',
+						parseHTML: (element) => {
+							const aspectRatio = normalizeAspectRatioAttr(
+								element.getAttribute('data-resize-aspect-ratio')
+							);
+							if (aspectRatio) return null;
+							return (
+								normalizeNumericAttr(element.getAttribute('height') || element.style.height) ||
+								'600'
+							);
+						},
 						renderHTML: (attributes) => {
+							const aspectRatio = normalizeAspectRatioAttr(attributes.aspectRatio);
+							if (aspectRatio) return {};
 							const height = normalizeNumericAttr(attributes.height) || '600';
 							return { height };
 						}
@@ -546,7 +572,7 @@ export default Extension.create<ResizeOptions>({
 								const node = view.state.doc.nodeAt(pos);
 								if (!node) return true;
 								const resizeMeta = resolveResizeMeta(node);
-								if (!resizeMeta || resizeMeta.kind === 'image') return true;
+								if (!resizeMeta || !canUseAspectRatioPreset(resizeMeta.kind)) return true;
 								const target = resolveTargetElement(view, pos, resizeMeta, node);
 								if (!target) return true;
 								const selectedRatio = ratioOption.dataset.aspectRatio || 'auto';
