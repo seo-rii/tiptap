@@ -48,6 +48,19 @@ const aspectRatioOptions = [
 	{ label: '4:3', value: '4:3' },
 	{ label: '9:16', value: '9:16' }
 ] as const;
+const horizontalAlignValues = ['left', 'center', 'right'] as const;
+type HorizontalAlign = (typeof horizontalAlignValues)[number];
+const horizontalAlignOptions = [
+	{ label: 'Auto', value: null },
+	{ label: 'Left', value: 'left' },
+	{ label: 'Center', value: 'center' },
+	{ label: 'Right', value: 'right' }
+] as const;
+const widthPresetOptions = [
+	{ label: '100%', value: '100%' },
+	{ label: '50%', value: '50%' }
+] as const;
+type WidthPreset = (typeof widthPresetOptions)[number]['value'];
 
 function isResizableType(value: string): value is ResizableType {
 	return typeSet.has(value);
@@ -117,6 +130,24 @@ function sameAspectRatio(left: string | null, right: string | null) {
 	const rightRatio = parseAspectRatio(right);
 	if (leftRatio === null || rightRatio === null) return false;
 	return Math.abs(leftRatio - rightRatio) <= 0.001;
+}
+
+function normalizeHorizontalAlignAttr(value: unknown): HorizontalAlign | null {
+	if (typeof value !== 'string') return null;
+	const normalized = value.trim().toLowerCase();
+	if (!normalized) return null;
+	return horizontalAlignValues.includes(normalized as HorizontalAlign)
+		? (normalized as HorizontalAlign)
+		: null;
+}
+
+function normalizeWidthPreset(value: unknown): WidthPreset | null {
+	if (typeof value !== 'string' && typeof value !== 'number') return null;
+	const normalized = String(value).trim();
+	if (!normalized) return null;
+	if (normalized === '100' || normalized === '100%') return '100%';
+	if (normalized === '50' || normalized === '50%') return '50%';
+	return null;
 }
 
 function normalizeStringAttr(value: unknown): string | null {
@@ -298,52 +329,233 @@ function canUseAspectRatioPreset(kind: ResizeKind) {
 	return kind === 'iframe' || kind === 'embed';
 }
 
+function canUseLayoutOptions(kind: ResizeKind) {
+	return kind === 'image' || canUseAspectRatioPreset(kind);
+}
+
+type ToolbarGroup = 'aspect' | 'align' | 'width';
+
+function createToolbarGroupIcon(group: ToolbarGroup) {
+	const icon = document.createElement('span');
+	icon.className = 'tiptap-media-toolbar-group-icon';
+	icon.dataset.group = group;
+	icon.setAttribute('aria-hidden', 'true');
+	return icon;
+}
+
 function createResizeHandleDecoration(
 	nodePos: number,
 	widgetPos: number,
 	resizeMeta: ResizeMeta,
 	node: ProseMirrorNode
 ) {
+	const widthKey = normalizeWidthAttr(node.attrs.width) || 'auto';
+	const aspectRatioKey = normalizeAspectRatioAttr(node.attrs.aspectRatio) || 'auto';
+	const horizontalAlignKey = normalizeHorizontalAlignAttr(node.attrs.horizontalAlign) || 'auto';
 	return Decoration.widget(
 		widgetPos,
 		() => {
 			const anchor = document.createElement('div');
 			anchor.className = 'tiptap-media-resize-anchor';
+			const isImageAnchor = resizeMeta.kind === 'image';
+			let controlsContainer: HTMLElement = anchor;
+			if (isImageAnchor) {
+				anchor.classList.add('is-image-anchor');
+				const controls = document.createElement('div');
+				controls.className = 'tiptap-media-resize-controls';
+				controls.style.left = '0px';
+				controls.style.width = '100%';
+				anchor.append(controls);
+				controlsContainer = controls;
+			} else {
+				const normalizedWidth = normalizeWidthAttr(node.attrs.width);
+				if (normalizedWidth) {
+					if (normalizedWidth.endsWith('%')) {
+						anchor.style.width = normalizedWidth;
+					} else {
+						const numericWidth = parseNumericSize(normalizedWidth);
+						if (numericWidth !== null) {
+							anchor.style.width = `${Math.round(numericWidth)}px`;
+						}
+					}
+					anchor.style.maxWidth = '100%';
+				}
+				const horizontalAlign = normalizeHorizontalAlignAttr(node.attrs.horizontalAlign);
+				if (horizontalAlign === 'center') {
+					anchor.style.marginLeft = 'auto';
+					anchor.style.marginRight = 'auto';
+				} else if (horizontalAlign === 'right') {
+					anchor.style.marginLeft = 'auto';
+					anchor.style.marginRight = '0';
+				} else {
+					anchor.style.marginLeft = '0';
+					anchor.style.marginRight = '0';
+				}
+			}
+			if (isImageAnchor) {
+				requestAnimationFrame(() => {
+					if (!anchor.isConnected) return;
+					let candidate: Element | null = anchor.previousElementSibling;
+					let imageElement: HTMLImageElement | null = null;
+					while (candidate && !imageElement) {
+						if (candidate instanceof HTMLImageElement) {
+							imageElement = candidate;
+						} else if (candidate instanceof HTMLElement) {
+							imageElement = candidate.querySelector<HTMLImageElement>('img');
+						}
+						candidate = candidate.previousElementSibling;
+					}
+					if (!imageElement && anchor.parentElement instanceof HTMLElement) {
+						imageElement =
+							anchor.parentElement.querySelector<HTMLImageElement>(
+								'figure.ProseMirror-selectednode img, img.ProseMirror-selectednode'
+							) || null;
+					}
+					if (!(imageElement instanceof HTMLElement)) return;
+					if (!(controlsContainer instanceof HTMLElement)) return;
+					const rect = imageElement.getBoundingClientRect();
+					if (rect.width <= 0 || rect.height <= 0) return;
+					const anchorRect = anchor.getBoundingClientRect();
+					const leftOffset = rect.left - anchorRect.left;
+					const maxLeft = Math.max(0, anchorRect.width - rect.width);
+					const clampedLeft = clamp(leftOffset, 0, maxLeft);
+					const topOffset = rect.bottom - anchorRect.top + 6;
+					controlsContainer.style.top = `${Math.round(topOffset)}px`;
+					controlsContainer.style.left = `${Math.round(clampedLeft)}px`;
+					controlsContainer.style.width = `${Math.round(rect.width)}px`;
+				});
+			}
 
 			const button = document.createElement('button');
 			button.type = 'button';
 			button.className = 'tiptap-media-resize-handle';
 			button.dataset.resizePos = String(nodePos);
 			button.dataset.resizeKind = resizeMeta.kind;
-			button.setAttribute('aria-label', 'Resize media height (click for aspect ratio)');
-			anchor.append(button);
+			button.setAttribute(
+				'aria-label',
+				canUseLayoutOptions(resizeMeta.kind)
+					? 'Resize media height (click for layout options)'
+					: 'Resize media height'
+			);
+			controlsContainer.append(button);
 
-			if (canUseAspectRatioPreset(resizeMeta.kind)) {
+			if (canUseLayoutOptions(resizeMeta.kind)) {
 				const selectedAspectRatio = normalizeAspectRatioAttr(node.attrs.aspectRatio);
+				const selectedHorizontalAlign = normalizeHorizontalAlignAttr(node.attrs.horizontalAlign);
+				const selectedWidthPreset = normalizeWidthPreset(node.attrs.width);
+				const supportsAspectRatio = canUseAspectRatioPreset(resizeMeta.kind);
+				const supportsBottomWidthPreset = resizeMeta.kind === 'image';
+
+				if (supportsAspectRatio) {
+					const widthHandle = document.createElement('button');
+					widthHandle.type = 'button';
+					widthHandle.className = 'tiptap-media-width-resize-handle';
+					widthHandle.dataset.resizePos = String(nodePos);
+					widthHandle.dataset.resizeKind = resizeMeta.kind;
+					widthHandle.setAttribute('aria-label', 'Resize media width (click for width presets)');
+					controlsContainer.append(widthHandle);
+				}
+
 				const toolbar = document.createElement('div');
 				toolbar.className = 'tiptap-media-aspect-ratio-toolbar';
 				toolbar.setAttribute('role', 'toolbar');
-				toolbar.setAttribute('aria-label', 'Aspect ratio presets');
+				toolbar.setAttribute('aria-label', 'Media resize options');
 				toolbar.dataset.resizePos = String(nodePos);
-				for (const option of aspectRatioOptions) {
+				let hasToolbarItems = false;
+
+				if (supportsAspectRatio) {
+					toolbar.append(createToolbarGroupIcon('aspect'));
+					for (const option of aspectRatioOptions) {
+						const optionButton = document.createElement('button');
+						optionButton.type = 'button';
+						optionButton.className = 'tiptap-media-aspect-ratio-option';
+						optionButton.dataset.resizePos = String(nodePos);
+						optionButton.dataset.aspectRatio = option.value ?? 'auto';
+						optionButton.textContent = option.label;
+						const isActive = option.value
+							? sameAspectRatio(option.value, selectedAspectRatio)
+							: !selectedAspectRatio;
+						optionButton.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+						toolbar.append(optionButton);
+					}
+					hasToolbarItems = true;
+				}
+
+				if (hasToolbarItems) {
+					const separator = document.createElement('span');
+					separator.className = 'tiptap-media-toolbar-separator';
+					separator.setAttribute('aria-hidden', 'true');
+					toolbar.append(separator);
+				}
+
+				toolbar.append(createToolbarGroupIcon('align'));
+				for (const option of horizontalAlignOptions) {
 					const optionButton = document.createElement('button');
 					optionButton.type = 'button';
-					optionButton.className = 'tiptap-media-aspect-ratio-option';
+					optionButton.className = 'tiptap-media-horizontal-align-option';
 					optionButton.dataset.resizePos = String(nodePos);
-					optionButton.dataset.aspectRatio = option.value ?? 'auto';
+					optionButton.dataset.horizontalAlign = option.value ?? 'auto';
 					optionButton.textContent = option.label;
 					const isActive = option.value
-						? sameAspectRatio(option.value, selectedAspectRatio)
-						: !selectedAspectRatio;
+						? option.value === selectedHorizontalAlign
+						: !selectedHorizontalAlign;
 					optionButton.setAttribute('aria-pressed', isActive ? 'true' : 'false');
 					toolbar.append(optionButton);
 				}
-				anchor.append(toolbar);
+				hasToolbarItems = true;
+
+				if (supportsBottomWidthPreset) {
+					const separator = document.createElement('span');
+					separator.className = 'tiptap-media-toolbar-separator';
+					separator.setAttribute('aria-hidden', 'true');
+					toolbar.append(separator);
+					toolbar.append(createToolbarGroupIcon('width'));
+					for (const option of widthPresetOptions) {
+						const optionButton = document.createElement('button');
+						optionButton.type = 'button';
+						optionButton.className = 'tiptap-media-width-option';
+						optionButton.dataset.resizePos = String(nodePos);
+						optionButton.dataset.widthPreset = option.value;
+						optionButton.textContent = option.label;
+						optionButton.setAttribute(
+							'aria-pressed',
+							selectedWidthPreset === option.value ? 'true' : 'false'
+						);
+						toolbar.append(optionButton);
+					}
+				}
+				controlsContainer.append(toolbar);
+
+				if (supportsAspectRatio) {
+					const widthToolbar = document.createElement('div');
+					widthToolbar.className = 'tiptap-media-width-toolbar';
+					widthToolbar.setAttribute('role', 'toolbar');
+					widthToolbar.setAttribute('aria-label', 'Media width presets');
+					widthToolbar.dataset.resizePos = String(nodePos);
+					widthToolbar.append(createToolbarGroupIcon('width'));
+					for (const option of widthPresetOptions) {
+						const optionButton = document.createElement('button');
+						optionButton.type = 'button';
+						optionButton.className = 'tiptap-media-width-option';
+						optionButton.dataset.resizePos = String(nodePos);
+						optionButton.dataset.widthPreset = option.value;
+						optionButton.textContent = option.label;
+						optionButton.setAttribute(
+							'aria-pressed',
+							selectedWidthPreset === option.value ? 'true' : 'false'
+						);
+						widthToolbar.append(optionButton);
+					}
+					controlsContainer.append(widthToolbar);
+				}
 			}
 
 			return anchor;
 		},
-		{ side: 1, key: `media-resize-${nodePos}-${resizeMeta.typeName}-${resizeMeta.kind}` }
+		{
+			side: 1,
+			key: `media-resize-${nodePos}-${resizeMeta.typeName}-${resizeMeta.kind}-${widthKey}-${aspectRatioKey}-${horizontalAlignKey}`
+		}
 	);
 }
 
@@ -478,6 +690,15 @@ export default Extension.create<ResizeOptions>({
 							const aspectRatio = normalizeAspectRatioAttr(attributes.aspectRatio);
 							return aspectRatio ? { 'data-resize-aspect-ratio': aspectRatio } : {};
 						}
+					},
+					horizontalAlign: {
+						default: null,
+						parseHTML: (element) =>
+							normalizeHorizontalAlignAttr(element.getAttribute('data-resize-horizontal-align')),
+						renderHTML: (attributes) => {
+							const horizontalAlign = normalizeHorizontalAlignAttr(attributes.horizontalAlign);
+							return horizontalAlign ? { 'data-resize-horizontal-align': horizontalAlign } : {};
+						}
 					}
 				}
 			}
@@ -488,10 +709,12 @@ export default Extension.create<ResizeOptions>({
 		let removeDragListeners: (() => void) | null = null;
 		const closeOpenToolbars = (view: EditorView, except: HTMLElement | null = null) => {
 			view.dom
-				.querySelectorAll<HTMLElement>('.tiptap-media-resize-anchor.is-toolbar-open')
+				.querySelectorAll<HTMLElement>(
+					'.tiptap-media-resize-anchor.is-toolbar-open, .tiptap-media-resize-anchor.is-width-toolbar-open'
+				)
 				.forEach((anchor) => {
 					if (except && anchor === except) return;
-					anchor.classList.remove('is-toolbar-open');
+					anchor.classList.remove('is-toolbar-open', 'is-width-toolbar-open');
 				});
 		};
 
@@ -561,6 +784,64 @@ export default Extension.create<ResizeOptions>({
 							if (!this.editor.isEditable) return false;
 							if (!(event.target instanceof HTMLElement)) return false;
 
+							const widthOption = event.target.closest<HTMLElement>('.tiptap-media-width-option');
+							if (widthOption) {
+								event.preventDefault();
+								event.stopPropagation();
+								const pos = Number.parseInt(widthOption.dataset.resizePos || '', 10);
+								if (!Number.isFinite(pos)) return true;
+								const node = view.state.doc.nodeAt(pos);
+								if (!node) return true;
+								const resizeMeta = resolveResizeMeta(node);
+								if (!resizeMeta || !canUseLayoutOptions(resizeMeta.kind)) return true;
+								const widthPreset = normalizeWidthPreset(widthOption.dataset.widthPreset);
+								if (!widthPreset) return true;
+								if (node.attrs.width !== widthPreset) {
+									view.dispatch(
+										view.state.tr.setNodeMarkup(pos, node.type, {
+											...node.attrs,
+											width: widthPreset
+										})
+									);
+								}
+								closeOpenToolbars(view);
+								return true;
+							}
+
+							const horizontalAlignOption = event.target.closest<HTMLElement>(
+								'.tiptap-media-horizontal-align-option'
+							);
+							if (horizontalAlignOption) {
+								event.preventDefault();
+								event.stopPropagation();
+								const pos = Number.parseInt(horizontalAlignOption.dataset.resizePos || '', 10);
+								if (!Number.isFinite(pos)) return true;
+								const node = view.state.doc.nodeAt(pos);
+								if (!node) return true;
+								const resizeMeta = resolveResizeMeta(node);
+								if (!resizeMeta || !canUseLayoutOptions(resizeMeta.kind)) return true;
+								const selectedHorizontalAlign =
+									horizontalAlignOption.dataset.horizontalAlign || 'auto';
+								const normalizedHorizontalAlign =
+									selectedHorizontalAlign === 'auto'
+										? null
+										: normalizeHorizontalAlignAttr(selectedHorizontalAlign);
+								if (selectedHorizontalAlign !== 'auto' && !normalizedHorizontalAlign) return true;
+								const currentHorizontalAlign = normalizeHorizontalAlignAttr(
+									node.attrs.horizontalAlign
+								);
+								if (normalizedHorizontalAlign !== currentHorizontalAlign) {
+									view.dispatch(
+										view.state.tr.setNodeMarkup(pos, node.type, {
+											...node.attrs,
+											horizontalAlign: normalizedHorizontalAlign
+										})
+									);
+								}
+								closeOpenToolbars(view);
+								return true;
+							}
+
 							const ratioOption = event.target.closest<HTMLElement>(
 								'.tiptap-media-aspect-ratio-option'
 							);
@@ -614,6 +895,160 @@ export default Extension.create<ResizeOptions>({
 								return true;
 							}
 
+							const widthHandle = event.target.closest<HTMLElement>(
+								'.tiptap-media-width-resize-handle'
+							);
+							if (widthHandle) {
+								const pos = Number.parseInt(widthHandle.dataset.resizePos || '', 10);
+								if (!Number.isFinite(pos)) return false;
+
+								const node = view.state.doc.nodeAt(pos);
+								if (!node) return false;
+
+								const resizeMeta = resolveResizeMeta(node);
+								if (!resizeMeta || !canUseAspectRatioPreset(resizeMeta.kind)) return false;
+
+								const resizeKind = widthHandle.dataset.resizeKind;
+								if (resizeKind && resizeMeta.kind !== resizeKind) return false;
+
+								const target = resolveTargetElement(view, pos, resizeMeta, node);
+								if (!target) return false;
+
+								event.preventDefault();
+								event.stopPropagation();
+
+								const anchor = widthHandle.closest<HTMLElement>('.tiptap-media-resize-anchor');
+								const startX = event.clientX;
+								const startY = event.clientY;
+								const startHeight = resolveStartHeight(resizeMeta.kind, node, target);
+								const targetParent = target.parentElement;
+								const shouldShowProxy = resizeMeta.kind !== 'image' && Boolean(targetParent);
+								const currentHorizontalAlign = normalizeHorizontalAlignAttr(
+									node.attrs.horizontalAlign
+								);
+								const startWidth = Math.max(
+									1,
+									resolveElementWidth(node, target) ||
+										targetParent?.getBoundingClientRect().width ||
+										0
+								);
+								let frame = 0;
+								let pendingWidth = startWidth;
+								let resizeProxy: HTMLDivElement | null = null;
+								let restoreTarget: (() => void) | null = null;
+								let isDragging = false;
+								let appliedDragCursor = false;
+								const previousCursor = document.body.style.cursor;
+								const previousSelect = document.body.style.userSelect;
+
+								const dispatchWidth = (width: number) => {
+									const current = view.state.doc.nodeAt(pos);
+									if (!current || current.type.name !== resizeMeta.typeName) return;
+
+									const currentMeta = resolveResizeMeta(current);
+									if (!currentMeta || !canUseAspectRatioPreset(currentMeta.kind)) return;
+
+									const containerWidth = target.parentElement?.getBoundingClientRect().width || 0;
+									const nextWidth =
+										containerWidth > 0
+											? `${Math.round(clamp((width / containerWidth) * 100, 10, 100))}%`
+											: String(Math.max(1, Math.round(width)));
+									if (nextWidth === current.attrs.width) return;
+
+									view.dispatch(
+										view.state.tr.setNodeMarkup(pos, current.type, {
+											...current.attrs,
+											width: nextWidth
+										})
+									);
+								};
+
+								const beginDrag = () => {
+									if (isDragging) return;
+									isDragging = true;
+									closeOpenToolbars(view);
+									if (shouldShowProxy && targetParent) {
+										const targetElement = target;
+										const originalDisplay = targetElement.style.display;
+										resizeProxy = document.createElement('div');
+										resizeProxy.className = 'tiptap-media-resize-proxy';
+										resizeProxy.style.height = `${Math.round(startHeight)}px`;
+										resizeProxy.style.width = `${Math.round(startWidth)}px`;
+										if (currentHorizontalAlign === 'center') {
+											resizeProxy.style.marginLeft = 'auto';
+											resizeProxy.style.marginRight = 'auto';
+										} else if (currentHorizontalAlign === 'right') {
+											resizeProxy.style.marginLeft = 'auto';
+											resizeProxy.style.marginRight = '0';
+										} else {
+											resizeProxy.style.marginLeft = '0';
+											resizeProxy.style.marginRight = '0';
+										}
+										targetParent.insertBefore(resizeProxy, targetElement);
+										targetElement.style.display = 'none';
+										restoreTarget = () => {
+											targetElement.style.display = originalDisplay;
+											resizeProxy?.remove();
+											resizeProxy = null;
+											restoreTarget = null;
+										};
+									}
+									document.body.style.cursor = 'ew-resize';
+									document.body.style.userSelect = 'none';
+									appliedDragCursor = true;
+								};
+
+								const onMove = (moveEvent: MouseEvent) => {
+									const deltaX = moveEvent.clientX - startX;
+									const deltaY = moveEvent.clientY - startY;
+									if (!isDragging && Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 4) return;
+									if (!isDragging) beginDrag();
+									const containerWidth = target.parentElement?.getBoundingClientRect().width || 0;
+									const minWidth = containerWidth > 0 ? Math.max(120, containerWidth * 0.2) : 120;
+									const maxWidth = containerWidth > 0 ? containerWidth : maxHeight;
+									const nextWidth = clamp(startWidth + deltaX, minWidth, maxWidth);
+									pendingWidth = nextWidth;
+									if (resizeProxy) resizeProxy.style.width = `${Math.round(nextWidth)}px`;
+									if (shouldShowProxy) return;
+									if (frame) cancelAnimationFrame(frame);
+									frame = requestAnimationFrame(() => dispatchWidth(nextWidth));
+								};
+
+								const cleanup = () => {
+									if (frame) cancelAnimationFrame(frame);
+									window.removeEventListener('mousemove', onMove);
+									window.removeEventListener('mouseup', onUp);
+									if (appliedDragCursor) {
+										document.body.style.cursor = previousCursor;
+										document.body.style.userSelect = previousSelect;
+									}
+									restoreTarget?.();
+									removeDragListeners = null;
+								};
+
+								const onUp = () => {
+									if (!isDragging) {
+										const shouldOpen =
+											Boolean(anchor) &&
+											!(anchor?.classList.contains('is-width-toolbar-open') ?? false);
+										closeOpenToolbars(view, shouldOpen && anchor ? anchor : null);
+										if (shouldOpen) anchor?.classList.remove('is-toolbar-open');
+										anchor?.classList.toggle('is-width-toolbar-open', shouldOpen);
+										cleanup();
+										return;
+									}
+									if (shouldShowProxy) dispatchWidth(pendingWidth);
+									cleanup();
+								};
+
+								removeDragListeners?.();
+								window.addEventListener('mousemove', onMove);
+								window.addEventListener('mouseup', onUp);
+								removeDragListeners = cleanup;
+
+								return true;
+							}
+
 							const handle = event.target.closest<HTMLElement>('.tiptap-media-resize-handle');
 							if (!handle) {
 								closeOpenToolbars(view);
@@ -643,7 +1078,11 @@ export default Extension.create<ResizeOptions>({
 							const startY = event.clientY;
 							const startHeight = resolveStartHeight(resizeMeta.kind, node, target);
 							const imageRatio = resizeMeta.kind === 'image' ? resolveImageRatio(node, target) : 1;
-							const shouldShowProxy = resizeMeta.kind !== 'image';
+							const shouldShowProxy = true;
+							const currentHorizontalAlign = normalizeHorizontalAlignAttr(
+								node.attrs.horizontalAlign
+							);
+							const startWidth = resolveElementWidth(node, target);
 							let resizeProxy: HTMLDivElement | null = null;
 							let restoreTarget: (() => void) | null = null;
 							let frame = 0;
@@ -694,6 +1133,19 @@ export default Extension.create<ResizeOptions>({
 									resizeProxy = document.createElement('div');
 									resizeProxy.className = 'tiptap-media-resize-proxy';
 									resizeProxy.style.height = `${Math.round(startHeight)}px`;
+									if (startWidth > 0) {
+										resizeProxy.style.width = `${Math.round(startWidth)}px`;
+									}
+									if (currentHorizontalAlign === 'center') {
+										resizeProxy.style.marginLeft = 'auto';
+										resizeProxy.style.marginRight = 'auto';
+									} else if (currentHorizontalAlign === 'right') {
+										resizeProxy.style.marginLeft = 'auto';
+										resizeProxy.style.marginRight = '0';
+									} else {
+										resizeProxy.style.marginLeft = '0';
+										resizeProxy.style.marginRight = '0';
+									}
 									target.parentElement.insertBefore(resizeProxy, targetElement);
 									targetElement.style.display = 'none';
 									restoreTarget = () => {
@@ -742,6 +1194,7 @@ export default Extension.create<ResizeOptions>({
 									const shouldOpen =
 										Boolean(anchor) && !(anchor?.classList.contains('is-toolbar-open') ?? false);
 									closeOpenToolbars(view, shouldOpen && anchor ? anchor : null);
+									if (shouldOpen) anchor?.classList.remove('is-width-toolbar-open');
 									anchor?.classList.toggle('is-toolbar-open', shouldOpen);
 									cleanup();
 									return;

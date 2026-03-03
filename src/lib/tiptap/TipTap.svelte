@@ -18,7 +18,6 @@
 		type I18nTranslate
 	} from '$lib/i18n';
 	import type { UploadFn } from '$lib/plugin/image/dragdrop';
-	import { fallbackUpload } from '$lib/plugin/image/dragdrop';
 	import MediaResize, { type ResizeOptions } from '$lib/plugin/resize';
 	import { Render } from 'nunui';
 
@@ -51,7 +50,7 @@
 		ref = $bindable(null),
 		options = {},
 		loaded = $bindable(false),
-		imageUpload = fallbackUpload,
+		imageUpload,
 		style = '',
 		blocks = [],
 		placeholder,
@@ -82,6 +81,7 @@
 		'data-resize-min-height',
 		'data-resize-max-height',
 		'data-resize-aspect-ratio',
+		'data-resize-horizontal-align',
 		'data-bubble-menu',
 		'data-hide-bubble-menu'
 	];
@@ -341,6 +341,10 @@
 		outline: 3px solid var(--primary);
 	}
 
+	.editable :global(.ProseMirror) {
+		position: relative;
+	}
+
 	.editable :global(.tiptap-media-resize-anchor) {
 		width: 100%;
 		display: flex;
@@ -350,6 +354,27 @@
 		line-height: 0;
 		pointer-events: none;
 		position: relative;
+		overflow: visible;
+	}
+
+	.editable :global(.tiptap-media-resize-anchor.is-image-anchor) {
+		position: relative;
+		display: block;
+		width: 100%;
+		height: 0;
+		margin: 0;
+		z-index: 4;
+	}
+
+	.editable :global(.tiptap-media-resize-anchor.is-image-anchor .tiptap-media-resize-controls) {
+		position: absolute;
+		top: 0;
+		left: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		line-height: 0;
+		pointer-events: none;
 		overflow: visible;
 	}
 
@@ -383,6 +408,39 @@
 		transform: translateY(1px);
 	}
 
+	.editable :global(.tiptap-media-width-resize-handle) {
+		appearance: none;
+		-webkit-appearance: none;
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 12px;
+		height: 12px;
+		margin: 0;
+		padding: 0;
+		border: 1px solid var(--primary-light3, rgba(120, 120, 120, 0.45));
+		border-radius: 999px;
+		background: var(--primary-light6, rgba(120, 120, 120, 0.2));
+		cursor: ew-resize;
+		pointer-events: auto;
+		transform: translate(40%, -40%);
+		transition:
+			background-color 0.15s ease,
+			border-color 0.15s ease,
+			transform 0.15s ease;
+	}
+
+	.editable :global(.tiptap-media-width-resize-handle:hover),
+	.editable :global(.tiptap-media-width-resize-handle:focus-visible) {
+		background: var(--primary-light4, rgba(120, 120, 120, 0.35));
+		border-color: var(--primary-light2, rgba(100, 100, 100, 0.55));
+		outline: none;
+	}
+
+	.editable :global(.tiptap-media-width-resize-handle:active) {
+		transform: translate(40%, -40%) scale(0.95);
+	}
+
 	.editable :global(.tiptap-media-aspect-ratio-toolbar) {
 		display: none;
 		align-items: center;
@@ -402,12 +460,81 @@
 		white-space: nowrap;
 	}
 
+	.editable :global(.tiptap-media-width-toolbar) {
+		display: none;
+		align-items: center;
+		gap: 4px;
+		padding: 4px;
+		border: 1px solid var(--primary-light3, rgba(120, 120, 120, 0.4));
+		border-radius: 999px;
+		background: var(--surface, #fff);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+		pointer-events: auto;
+		line-height: 1;
+		position: absolute;
+		top: calc(100% + 6px);
+		right: 0;
+		z-index: 4;
+		white-space: nowrap;
+	}
+
 	.editable
 		:global(.tiptap-media-resize-anchor.is-toolbar-open .tiptap-media-aspect-ratio-toolbar) {
 		display: flex;
 	}
 
-	.editable :global(.tiptap-media-aspect-ratio-option) {
+	.editable :global(.tiptap-media-resize-anchor.is-width-toolbar-open .tiptap-media-width-toolbar) {
+		display: flex;
+	}
+
+	.editable :global(.tiptap-media-toolbar-separator) {
+		width: 1px;
+		height: 16px;
+		background: var(--primary-light2, rgba(120, 120, 120, 0.35));
+		opacity: 0.9;
+	}
+
+	.editable :global(.tiptap-media-toolbar-group-icon) {
+		width: 14px;
+		height: 14px;
+		border: 1px solid var(--primary-light3, rgba(120, 120, 120, 0.45));
+		border-radius: 4px;
+		color: var(--on-surface, #333);
+		opacity: 0.75;
+		flex: 0 0 auto;
+		pointer-events: none;
+	}
+
+	.editable :global(.tiptap-media-toolbar-group-icon[data-group='aspect']) {
+		background: linear-gradient(
+				135deg,
+				transparent 42%,
+				currentColor 43%,
+				currentColor 57%,
+				transparent 58%
+			)
+			center / 100% 100% no-repeat;
+	}
+
+	.editable :global(.tiptap-media-toolbar-group-icon[data-group='align']) {
+		background:
+			linear-gradient(currentColor, currentColor) left 2px top 3px / 8px 1.5px no-repeat,
+			linear-gradient(currentColor, currentColor) center top 6px / 10px 1.5px no-repeat,
+			linear-gradient(currentColor, currentColor) right 2px top 9px / 8px 1.5px no-repeat;
+	}
+
+	.editable :global(.tiptap-media-toolbar-group-icon[data-group='width']) {
+		background:
+			linear-gradient(currentColor, currentColor) center / 8px 1.5px no-repeat,
+			linear-gradient(45deg, transparent 38%, currentColor 39%, currentColor 61%, transparent 62%)
+				left 2px center / 4px 4px no-repeat,
+			linear-gradient(-45deg, transparent 38%, currentColor 39%, currentColor 61%, transparent 62%)
+				right 2px center / 4px 4px no-repeat;
+	}
+
+	.editable :global(.tiptap-media-aspect-ratio-option),
+	.editable :global(.tiptap-media-horizontal-align-option),
+	.editable :global(.tiptap-media-width-option) {
 		appearance: none;
 		-webkit-appearance: none;
 		margin: 0;
@@ -423,12 +550,18 @@
 	}
 
 	.editable :global(.tiptap-media-aspect-ratio-option:hover),
-	.editable :global(.tiptap-media-aspect-ratio-option:focus-visible) {
+	.editable :global(.tiptap-media-aspect-ratio-option:focus-visible),
+	.editable :global(.tiptap-media-horizontal-align-option:hover),
+	.editable :global(.tiptap-media-horizontal-align-option:focus-visible),
+	.editable :global(.tiptap-media-width-option:hover),
+	.editable :global(.tiptap-media-width-option:focus-visible) {
 		background: var(--primary-light1, rgba(120, 120, 120, 0.14));
 		outline: none;
 	}
 
-	.editable :global(.tiptap-media-aspect-ratio-option[aria-pressed='true']) {
+	.editable :global(.tiptap-media-aspect-ratio-option[aria-pressed='true']),
+	.editable :global(.tiptap-media-horizontal-align-option[aria-pressed='true']),
+	.editable :global(.tiptap-media-width-option[aria-pressed='true']) {
 		background: var(--primary-light4, rgba(120, 120, 120, 0.3));
 		color: var(--on-primary, #000);
 	}
@@ -467,6 +600,10 @@
 			object-fit: contain;
 			border-radius: 12px;
 			position: relative;
+		}
+
+		& :global(figure[data-bubble-menu='false']) {
+			margin: 0;
 		}
 
 		& :global(code.inline) {
@@ -535,8 +672,38 @@
 		& :global(iframe),
 		& :global(embed) {
 			display: block;
-			width: 100%;
 			max-width: 100%;
+			margin-left: var(--tiptap-media-horizontal-margin-left, 0);
+			margin-right: var(--tiptap-media-horizontal-margin-right, 0);
+		}
+
+		& :global(img[data-resize-horizontal-align]) {
+			display: block;
+			margin-left: var(--tiptap-media-horizontal-margin-left, 0);
+			margin-right: var(--tiptap-media-horizontal-margin-right, 0);
+		}
+
+		& :global(img[width='100%']) {
+			width: 100%;
+		}
+
+		& :global(img[width='50%']) {
+			width: 50%;
+		}
+
+		& :global([data-resize-horizontal-align='left']) {
+			--tiptap-media-horizontal-margin-left: 0;
+			--tiptap-media-horizontal-margin-right: auto;
+		}
+
+		& :global([data-resize-horizontal-align='center']) {
+			--tiptap-media-horizontal-margin-left: auto;
+			--tiptap-media-horizontal-margin-right: auto;
+		}
+
+		& :global([data-resize-horizontal-align='right']) {
+			--tiptap-media-horizontal-margin-left: auto;
+			--tiptap-media-horizontal-margin-right: 0;
 		}
 
 		& :global([data-resize-aspect-ratio='16:9']) {
