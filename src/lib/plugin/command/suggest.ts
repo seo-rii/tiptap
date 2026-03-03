@@ -67,33 +67,37 @@ function matchItem(item: SlashItem, query: string, compactQuery: string): boolea
 }
 
 function fixRange(editor: Editor, rawRange: Range, split = '/'): Range {
-	const range = { ...rawRange };
-	const { state } = editor.view;
-	const { selection, doc } = state;
+	const doc = editor.state.doc;
+	const docSize = doc.content.size;
+	const range: Range = {
+		from: Math.max(0, Math.min(rawRange.from, docSize)),
+		to: Math.max(0, Math.min(rawRange.to, docSize))
+	};
 
-	if (selection.$to.nodeBefore?.text?.includes?.(split)) {
-		range.from = range.to;
-		while (range.from > 0 && doc.textBetween(range.from - 1, range.from) !== split) {
-			try {
-				range.from -= 1;
-			} catch {
-				range.from += 2;
-				break;
-			}
-		}
-		range.from -= 1;
-	}
+	if (range.to < range.from) range.to = range.from;
 
-	while (range.to < selection.to && doc.textBetween(range.to, range.to + 1) !== ' ') {
-		try {
-			range.to += 1;
-		} catch {
-			range.to -= 1;
+	if (doc.textBetween(range.from, Math.min(range.from + 1, docSize)) !== split && range.from > 0) {
+		const minFrom = Math.max(0, range.from - 64);
+		for (let cursor = range.from; cursor > minFrom; cursor -= 1) {
+			const char = doc.textBetween(cursor - 1, cursor);
+			if (!char || /\s/.test(char)) break;
+			if (char !== split) continue;
+			range.from = cursor - 1;
 			break;
 		}
 	}
 
+	while (range.to < docSize) {
+		const next = doc.textBetween(range.to, range.to + 1);
+		if (!next || /\s/.test(next)) break;
+		range.to += 1;
+	}
+
 	return range;
+}
+
+function clampDocPos(editor: Editor, pos: number): number {
+	return Math.max(0, Math.min(pos, editor.state.doc.content.size));
 }
 
 export function getDetail(editor: Editor, range: Range, option: DetailInput) {
@@ -190,7 +194,21 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 						subtitle: i18n('imageInfo'),
 						keywords: createKeywords(['image', 'imageInfo']),
 						command: ({ editor, range }) => {
-							editor.chain().focus().deleteRange(fixRange(editor, range)).run();
+							const fixedRange = fixRange(editor, range);
+							editor.chain().focus().deleteRange(fixedRange).run();
+							let insertAt = clampDocPos(editor, fixedRange.from);
+							let insertParagraph = true;
+
+							const { selection } = editor.state;
+							if (
+								selection.empty &&
+								selection.$from.depth > 0 &&
+								selection.$from.parent.isTextblock &&
+								selection.$from.parent.content.size === 0
+							) {
+								insertAt = clampDocPos(editor, selection.$from.before(selection.$from.depth));
+								insertParagraph = false;
+							}
 
 							const input = document.createElement('input');
 							input.type = 'file';
@@ -203,12 +221,14 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 
 								const skeleton = insertUploadSkeleton(editor, {
 									kind: 'image',
-									height: 220
+									height: 220,
+									at: insertAt,
+									insertParagraph
 								});
 
 								try {
-									const upload =
-										(window as WindowWithTipTapGlobals).__image_uploader ?? fallbackUpload;
+									const imageUploader = (window as WindowWithTipTapGlobals).__image_uploader;
+									const upload = imageUploader ?? fallbackUpload;
 									const src = await upload(file);
 									if (skeleton) {
 										skeleton.replaceWith({
@@ -216,9 +236,19 @@ export const suggest: Omit<SuggestionOptions<SlashGroup>, 'editor'> = {
 											attrs: { src }
 										});
 									} else {
-										editor.chain().focus().setImage({ src }).run();
+										editor
+											.chain()
+											.insertContentAt(
+												clampDocPos(editor, insertAt),
+												insertParagraph
+													? [{ type: 'image', attrs: { src } }, { type: 'paragraph' }]
+													: { type: 'image', attrs: { src } }
+											)
+											.run();
 									}
-									releaseObjectUrlOnImageSettled(editor.view, src);
+									if (imageUploader) {
+										releaseObjectUrlOnImageSettled(editor.view, src);
+									}
 								} catch {
 									skeleton?.remove();
 								}

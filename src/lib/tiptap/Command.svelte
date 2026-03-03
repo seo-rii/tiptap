@@ -12,11 +12,9 @@
 	import { quartOut } from 'svelte/easing';
 	import defaultI18n, { I18N_CONTEXT, type I18nTranslate } from '$lib/i18n';
 
-	const editor = getContext<{ v: any }>('editor');
 	const i18nFromContext = getContext<I18nTranslate | undefined>(I18N_CONTEXT);
 	const i18n: I18nTranslate = (...args) =>
 		i18nFromContext ? i18nFromContext(...args) : defaultI18n(...args);
-	const tiptap = $derived(editor.v);
 
 	let height = $state(0);
 	let input = $state(''),
@@ -32,7 +30,6 @@
 		if (!editor || !range) return;
 
 		item.command({ editor, range });
-		setTimeout(() => tiptap?.commands?.focus?.());
 	}
 
 	function runDetailCommand() {

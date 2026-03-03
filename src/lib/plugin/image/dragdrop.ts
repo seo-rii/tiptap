@@ -80,7 +80,8 @@ export const dropImagePlugin = () => {
 		props: {
 			handleDOMEvents: {
 				paste(view, event) {
-					const upload: UploadFn = (<any>window).__image_uploader || fallbackUpload;
+					const imageUploader: UploadFn | undefined = (<any>window).__image_uploader;
+					const upload: UploadFn = imageUploader || fallbackUpload;
 					const items = Array.from(event.clipboardData?.items || []);
 					const { schema } = view.state;
 
@@ -113,7 +114,9 @@ export const dropImagePlugin = () => {
 											const transaction = view.state.tr.replaceSelectionWith(node);
 											view.dispatch(transaction);
 										}
-										releaseObjectUrlOnImageSettled(view, src);
+										if (imageUploader) {
+											releaseObjectUrlOnImageSettled(view, src);
+										}
 									})
 									.catch(() => {
 										skeleton?.remove();
@@ -136,7 +139,8 @@ export const dropImagePlugin = () => {
 					return false;
 				},
 				drop: (view, event) => {
-					const upload: UploadFn = (<any>window).__image_uploader || fallbackUpload;
+					const imageUploader: UploadFn | undefined = (<any>window).__image_uploader;
+					const upload: UploadFn = imageUploader || fallbackUpload;
 					const hasFiles =
 						event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length;
 
@@ -188,7 +192,9 @@ export const dropImagePlugin = () => {
 									const transaction = view.state.tr.insert(coordinates.pos, node);
 									view.dispatch(transaction);
 								}
-								releaseObjectUrlOnImageSettled(view, src);
+								if (imageUploader) {
+									releaseObjectUrlOnImageSettled(view, src);
+								}
 							} catch {
 								skeleton?.remove();
 							}
