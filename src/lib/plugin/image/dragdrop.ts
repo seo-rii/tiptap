@@ -84,17 +84,16 @@ export const dropImagePlugin = () => {
 					const upload: UploadFn = imageUploader || fallbackUpload;
 					const items = Array.from(event.clipboardData?.items || []);
 					const { schema } = view.state;
+					let handledImagePaste = false;
 
 					items.forEach((item) => {
 						const image = item.getAsFile();
 
 						if (item.type.indexOf('image') === 0) {
+							handledImagePaste = true;
 							event.preventDefault();
 							const skeleton = insertUploadSkeleton(
-								{
-									state: view.state,
-									view
-								},
+								{ view },
 								{
 									kind: 'image',
 									height: 220
@@ -136,7 +135,7 @@ export const dropImagePlugin = () => {
 						}
 					});
 
-					return false;
+					return handledImagePaste;
 				},
 				drop: (view, event) => {
 					const imageUploader: UploadFn | undefined = (<any>window).__image_uploader;
@@ -168,10 +167,7 @@ export const dropImagePlugin = () => {
 					images.forEach(async (image) => {
 						const reader = new FileReader();
 						const skeleton = insertUploadSkeleton(
-							{
-								state: view.state,
-								view
-							},
+							{ view },
 							{
 								kind: 'image',
 								height: 220,

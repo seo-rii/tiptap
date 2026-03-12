@@ -25,7 +25,7 @@ type InsertUploadSkeletonOptions = {
 type ReplaceOptions = {
 	select?: boolean;
 };
-type EditorLike = Pick<Editor, 'state' | 'view'>;
+type EditorLike = Pick<Editor, 'view'>;
 
 export type UploadSkeletonHandle = {
 	id: string;
@@ -34,20 +34,20 @@ export type UploadSkeletonHandle = {
 	remove: () => boolean;
 };
 
-function findUploadSkeleton(doc: ProseMirrorNode, id: string) {
-	let foundPos: number | null = null;
-	let foundNode: ProseMirrorNode | null = null;
+function findUploadSkeleton(
+	doc: ProseMirrorNode,
+	id: string
+): { pos: number; node: ProseMirrorNode } | null {
+	let target: { pos: number; node: ProseMirrorNode } | null = null;
 
 	doc.descendants((node, pos) => {
 		if (node.type.name !== UPLOAD_SKELETON_NODE) return;
 		if (node.attrs.uploadId !== id) return;
-		foundPos = pos;
-		foundNode = node;
+		target = { pos, node };
 		return false;
 	});
 
-	if (foundPos === null || foundNode === null) return null;
-	return { pos: foundPos, node: foundNode };
+	return target;
 }
 
 function tryCreateNodeSelection(doc: ProseMirrorNode, pos: number) {
@@ -71,15 +71,16 @@ export function insertUploadSkeleton(
 		insertParagraph = true
 	}: InsertUploadSkeletonOptions = {}
 ): UploadSkeletonHandle | null {
-	const skeletonType = editor.state.schema.nodes[UPLOAD_SKELETON_NODE];
+	const getState = () => editor.view.state;
+	const skeletonType = getState().schema.nodes[UPLOAD_SKELETON_NODE];
 	if (!skeletonType) return null;
 
 	const clampedHeight = Math.max(44, Math.min(1200, Math.round(height)));
 	const uploadId = `upload-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 	const node = skeletonType.create({ uploadId, kind, height: clampedHeight });
-	const paragraph = editor.state.schema.nodes.paragraph?.create();
-	const safePos = Math.max(0, Math.min(at ?? editor.state.selection.from, editor.state.doc.content.size));
-	const tr = editor.state.tr.insert(safePos, node);
+	const paragraph = getState().schema.nodes.paragraph?.create();
+	const safePos = Math.max(0, Math.min(at ?? getState().selection.from, getState().doc.content.size));
+	const tr = getState().tr.insert(safePos, node);
 
 	if (insertParagraph && paragraph) {
 		tr.insert(safePos + node.nodeSize, paragraph);
@@ -94,20 +95,21 @@ export function insertUploadSkeleton(
 
 	return {
 		id: uploadId,
-		exists: () => Boolean(findUploadSkeleton(editor.state.doc, uploadId)),
+		exists: () => Boolean(findUploadSkeleton(getState().doc, uploadId)),
 		replaceWith: (content: JSONContent, options: ReplaceOptions = {}) => {
-			const target = findUploadSkeleton(editor.state.doc, uploadId);
+			const state = getState();
+			const target = findUploadSkeleton(state.doc, uploadId);
 			if (!target) return false;
 			if (!content?.type) return false;
 
 			let nextNode: ProseMirrorNode;
 			try {
-				nextNode = editor.state.schema.nodeFromJSON(content as any);
+				nextNode = state.schema.nodeFromJSON(content as any);
 			} catch {
 				return false;
 			}
 
-			const tr = editor.state.tr.replaceWith(
+			const tr = state.tr.replaceWith(
 				target.pos,
 				target.pos + target.node.nodeSize,
 				nextNode
@@ -120,17 +122,18 @@ export function insertUploadSkeleton(
 			return true;
 		},
 		remove: () => {
-			const target = findUploadSkeleton(editor.state.doc, uploadId);
+			const state = getState();
+			const target = findUploadSkeleton(state.doc, uploadId);
 			if (!target) return false;
 
 			const removeFrom = target.pos;
 			let removeTo = target.pos + target.node.nodeSize;
-			const nextNode = editor.state.doc.nodeAt(removeTo);
+			const nextNode = state.doc.nodeAt(removeTo);
 			if (nextNode?.type.name === 'paragraph' && nextNode.content.size === 0) {
 				removeTo += nextNode.nodeSize;
 			}
 
-			editor.view.dispatch(editor.state.tr.deleteRange(removeFrom, removeTo));
+			editor.view.dispatch(state.tr.deleteRange(removeFrom, removeTo));
 			return true;
 		}
 	};
