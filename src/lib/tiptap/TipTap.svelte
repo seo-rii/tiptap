@@ -154,6 +154,9 @@
 		Promise.all([import('./tiptap'), import('@justinribeiro/lite-youtube')]).then(
 			([{ default: tt }]) => {
 				if (!untrack(() => mounted)) return;
+				const initialBody = untrack(() => san(body));
+				body = initialBody;
+				last = initialBody;
 				const editorPlaceholder = placeholder ?? scopedI18n('placeholder');
 				const optionPlugins = Array.isArray(options.plugins)
 					? [...options.plugins]
@@ -164,7 +167,7 @@
 					const resizeOptions = typeof resize === 'object' ? resize : {};
 					optionPlugins.unshift(MediaResize.configure(resizeOptions));
 				}
-				tiptap.v = ref = tt(element, r, {
+				tiptap.v = ref = tt(element, initialBody, {
 					placeholder: editorPlaceholder,
 					editable,
 					onTransaction: () => {
