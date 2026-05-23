@@ -47,7 +47,12 @@
 		position: absolute;
 		inset: 0;
 		transform: translateX(-120%);
-		background: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.36), transparent 80%);
+		background: linear-gradient(
+			105deg,
+			transparent 20%,
+			rgba(255, 255, 255, 0.36),
+			transparent 80%
+		);
 		animation: shimmer 1.35s ease-in-out infinite;
 	}
 

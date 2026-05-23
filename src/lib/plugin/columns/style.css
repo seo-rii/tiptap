@@ -1,4 +1,5 @@
 .tiptap-columns {
+	position: relative;
 	display: grid;
 	gap: 12px;
 	margin: 12px 0;
@@ -10,6 +11,13 @@
 
 .tiptap-columns.columns-3 {
 	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 768px) {
+	.tiptap-columns.columns-2,
+	.tiptap-columns.columns-3 {
+		grid-template-columns: minmax(0, 1fr);
+	}
 }
 
 .tiptap-column {
@@ -34,4 +42,41 @@
 
 .editable .tiptap-column:hover {
 	border-color: var(--primary-light7, rgba(112, 112, 112, 0.65));
+}
+
+.editable .tiptap-columns::before {
+	position: absolute;
+	z-index: 1;
+	top: 4px;
+	right: 4px;
+	box-sizing: border-box;
+	width: 32px;
+	height: 32px;
+	border: 1px solid var(--primary-light4, rgba(112, 112, 112, 0.4));
+	border-radius: 6px;
+	background-color: var(--surface, Canvas);
+	background-image: radial-gradient(currentColor 1.2px, transparent 1.2px);
+	background-position: 7px 7px;
+	background-size: 8px 8px;
+	color: var(--primary-light8, rgba(112, 112, 112, 0.75));
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+	content: '';
+	cursor: pointer;
+	opacity: 0;
+	transition:
+		opacity 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease;
+}
+
+.editable .tiptap-columns:hover::before,
+.editable .tiptap-columns.ProseMirror-selectednode::before {
+	opacity: 1;
+	border-color: var(--primary-light7, rgba(112, 112, 112, 0.65));
+	color: var(--primary, currentColor);
+}
+
+.editable .tiptap-columns.ProseMirror-selectednode {
+	outline: 3px solid var(--primary);
+	outline-offset: 2px;
 }

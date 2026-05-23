@@ -43,6 +43,7 @@
 		resize?: boolean | ResizeOptions;
 	};
 
+	/* eslint-disable no-useless-assignment -- Svelte bindable props are read by parent bindings. */
 	let {
 		body = $bindable<string>(),
 		editable = false,
@@ -73,6 +74,7 @@
 		codeBlockLanguageLabels = {},
 		resize = true
 	}: Props = $props();
+	/* eslint-enable no-useless-assignment */
 
 	const scopedI18n: I18nTranslate = (...args) => translateWithLocale(locale, ...args);
 	const resizeDataAttrs = [

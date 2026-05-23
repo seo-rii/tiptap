@@ -8,12 +8,7 @@ type ReplaceTarget = {
 	text: string;
 };
 
-const pushUniqueTarget = (
-	targets: ReplaceTarget[],
-	from: number,
-	to: number,
-	text: string
-) => {
+const pushUniqueTarget = (targets: ReplaceTarget[], from: number, to: number, text: string) => {
 	if (targets.some((target) => target.from === from && target.to === to)) return;
 	targets.push({ from, to, text });
 };
@@ -33,11 +28,15 @@ const collectMathTargets = (state: CommandProps['state'], mathInline: NodeType) 
 		pushUniqueTarget(targets, from, to, selection.$from.parent.textContent);
 	}
 
-	state.doc.nodesBetween(selection.from, selection.to, (node: ProseMirrorNode, position: number) => {
-		if (node.type !== mathInline) return;
-		pushUniqueTarget(targets, position, position + node.nodeSize, node.textContent);
-		return false;
-	});
+	state.doc.nodesBetween(
+		selection.from,
+		selection.to,
+		(node: ProseMirrorNode, position: number) => {
+			if (node.type !== mathInline) return;
+			pushUniqueTarget(targets, position, position + node.nodeSize, node.textContent);
+			return false;
+		}
+	);
 
 	return targets;
 };
@@ -63,20 +62,24 @@ const wrapSelectionAsMath = ({ state, tr }: CommandProps, mathInline: NodeType) 
 	if (selection.empty) return false;
 
 	const targets: ReplaceTarget[] = [];
-	state.doc.nodesBetween(selection.from, selection.to, (node: ProseMirrorNode, position: number) => {
-		if (!node.isTextblock) return;
+	state.doc.nodesBetween(
+		selection.from,
+		selection.to,
+		(node: ProseMirrorNode, position: number) => {
+			if (!node.isTextblock) return;
 
-		const contentFrom = position + 1;
-		const contentTo = position + node.nodeSize - 1;
-		const from = Math.max(selection.from, contentFrom);
-		const to = Math.min(selection.to, contentTo);
-		if (from >= to) return;
+			const contentFrom = position + 1;
+			const contentTo = position + node.nodeSize - 1;
+			const from = Math.max(selection.from, contentFrom);
+			const to = Math.min(selection.to, contentTo);
+			if (from >= to) return;
 
-		const text = state.doc.textBetween(from, to, '');
-		if (!text.length) return;
+			const text = state.doc.textBetween(from, to, '');
+			if (!text.length) return;
 
-		targets.push({ from, to, text });
-	});
+			targets.push({ from, to, text });
+		}
+	);
 
 	if (!targets.length) return false;
 

@@ -502,7 +502,6 @@ function createResizeHandleDecoration(
 					optionButton.setAttribute('aria-pressed', isActive ? 'true' : 'false');
 					toolbar.append(optionButton);
 				}
-				hasToolbarItems = true;
 
 				if (supportsBottomWidthPreset) {
 					const separator = document.createElement('span');
@@ -922,7 +921,7 @@ export default Extension.create<ResizeOptions>({
 								const startY = event.clientY;
 								const startHeight = resolveStartHeight(resizeMeta.kind, node, target);
 								const targetParent = target.parentElement;
-								const shouldShowProxy = resizeMeta.kind !== 'image' && Boolean(targetParent);
+								const shouldShowProxy = Boolean(targetParent);
 								const currentHorizontalAlign = normalizeHorizontalAlignAttr(
 									node.attrs.horizontalAlign
 								);

@@ -79,7 +79,10 @@ export function insertUploadSkeleton(
 	const uploadId = `upload-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 	const node = skeletonType.create({ uploadId, kind, height: clampedHeight });
 	const paragraph = getState().schema.nodes.paragraph?.create();
-	const safePos = Math.max(0, Math.min(at ?? getState().selection.from, getState().doc.content.size));
+	const safePos = Math.max(
+		0,
+		Math.min(at ?? getState().selection.from, getState().doc.content.size)
+	);
 	const tr = getState().tr.insert(safePos, node);
 
 	if (insertParagraph && paragraph) {
@@ -109,11 +112,7 @@ export function insertUploadSkeleton(
 				return false;
 			}
 
-			const tr = state.tr.replaceWith(
-				target.pos,
-				target.pos + target.node.nodeSize,
-				nextNode
-			);
+			const tr = state.tr.replaceWith(target.pos, target.pos + target.node.nodeSize, nextNode);
 			if (options.select ?? true) {
 				const nodeSelection = tryCreateNodeSelection(tr.doc, target.pos);
 				if (nodeSelection) tr.setSelection(nodeSelection);
@@ -157,8 +156,7 @@ export default Node.create({
 			kind: {
 				default: 'block',
 				parseHTML: (element) => element.getAttribute('data-upload-kind') || 'block',
-				renderHTML: (attributes) =>
-					attributes.kind ? { 'data-upload-kind': attributes.kind } : {}
+				renderHTML: (attributes) => (attributes.kind ? { 'data-upload-kind': attributes.kind } : {})
 			},
 			height: {
 				default: defaultHeight.block,

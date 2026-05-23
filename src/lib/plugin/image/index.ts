@@ -1,12 +1,15 @@
-import Image from '@tiptap/extension-image';
+import Image, { type ImageOptions } from '@tiptap/extension-image';
 import { mergeAttributes } from '@tiptap/core';
 import { dropImagePlugin } from '$lib/plugin/image/dragdrop';
 
+type ImageOptionsWithSizes = ImageOptions & {
+	sizes: string[];
+};
+
 export default (crossorigin = 'anonymous') =>
-	Image.extend({
+	Image.extend<ImageOptionsWithSizes>({
 		addOptions() {
-			const parentOptions =
-				(this as unknown as { parent?: () => Record<string, unknown> }).parent?.() ?? {};
+			const parentOptions = this.parent?.() ?? {};
 
 			return {
 				...parentOptions,
