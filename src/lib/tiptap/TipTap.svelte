@@ -94,6 +94,7 @@
 			allowedTags: sanitizeHtml.defaults.allowedTags.concat([
 				'img',
 				'math-inline',
+				'math-display',
 				'math-node',
 				'iframe',
 				'lite-youtube',
