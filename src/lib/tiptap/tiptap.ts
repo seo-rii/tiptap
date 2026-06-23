@@ -4,9 +4,22 @@ import {
 	type CodeBlockLowlightOptions
 } from '@tiptap/extension-code-block-lowlight';
 import { all, createLowlight } from 'lowlight';
+import { Blockquote } from '@tiptap/extension-blockquote';
+import { Bold } from '@tiptap/extension-bold';
+import { BulletList } from '@tiptap/extension-bullet-list';
 import Code from '@tiptap/extension-code';
+import { Document } from '@tiptap/extension-document';
+import { Gapcursor } from '@tiptap/extension-gapcursor';
+import { HardBreak } from '@tiptap/extension-hard-break';
+import { Heading } from '@tiptap/extension-heading';
+import { History } from '@tiptap/extension-history';
+import { HorizontalRule } from '@tiptap/extension-horizontal-rule';
+import { Italic } from '@tiptap/extension-italic';
+import { ListItem } from '@tiptap/extension-list-item';
+import { Paragraph } from '@tiptap/extension-paragraph';
+import { Strike } from '@tiptap/extension-strike';
+import { Text } from '@tiptap/extension-text';
 import Image from '$lib/plugin/image';
-import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
@@ -27,6 +40,7 @@ import Embed from '$lib/plugin/embed';
 import UploadSkeleton from '$lib/plugin/upload/skeleton';
 // @ts-ignore
 import { MathInline, MathBlock } from '@seorii/prosemirror-math/tiptap';
+import MathPaste from '$lib/plugin/mathPaste';
 import Youtube from '$lib/plugin/youtube';
 import Placeholder from '@tiptap/extension-placeholder';
 import columns from '$lib/plugin/columns';
@@ -255,54 +269,82 @@ const extensions = (
 	plugins: any[],
 	crossorigin: CrossOrigin,
 	codeBlockLanguageLabels: CodeBlockLanguageLabelMap
-) => [
-	CodeBlockWithLanguageSelect.configure({
-		lowlight: lowlight(),
-		languageLabelMap: codeBlockLanguageLabels
-	}),
-	slashKeymap,
-	Image(crossorigin),
-	Youtube,
-	StarterKit,
-	Underline,
-	Highlight.configure({ multicolor: true }),
-	Link.configure({
-		openOnClick: true,
-		protocols: [
-			'ftp',
-			'mailto',
-			{
-				scheme: 'tel',
-				optionalSlashes: true
+) => {
+	const pluginNames = new Set(
+		plugins
+			.map((plugin) => plugin?.name)
+			.filter((name): name is string => typeof name === 'string')
+	);
+	const baseExtensions = [
+		Bold,
+		Blockquote,
+		BulletList,
+		Code.extend({
+			renderHTML({ HTMLAttributes }) {
+				return ['code', mergeAttributes(HTMLAttributes, { class: 'inline' })];
 			}
-		]
-	}),
-	TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
-	DropCursor,
-	orderedlist,
-	MathInline,
-	MathBlock,
-	...columns,
-	table,
-	tableHeader,
-	tableRow,
-	tableCell,
-	Superscript,
-	Subscript,
-	Indent,
-	Color,
-	TextStyle,
-	UploadSkeleton,
-	Iframe,
-	Embed,
-	Code.extend({
-		renderHTML({ HTMLAttributes }) {
-			return ['code', mergeAttributes(HTMLAttributes, { class: 'inline' })];
-		}
-	}),
-	Placeholder.configure({ placeholder }),
-	...plugins
-];
+		}),
+		CodeBlockWithLanguageSelect.configure({
+			lowlight: lowlight(),
+			languageLabelMap: codeBlockLanguageLabels
+		}),
+		Document,
+		DropCursor,
+		Gapcursor,
+		HardBreak,
+		Heading,
+		History,
+		HorizontalRule,
+		Italic,
+		ListItem,
+		orderedlist,
+		Paragraph,
+		Strike,
+		Text,
+		slashKeymap,
+		Image(crossorigin),
+		Youtube,
+		Underline,
+		Highlight.configure({ multicolor: true }),
+		Link.configure({
+			openOnClick: true,
+			protocols: [
+				'ftp',
+				'mailto',
+				{
+					scheme: 'tel',
+					optionalSlashes: true
+				}
+			]
+		}),
+		TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
+		MathInline,
+		MathBlock,
+		MathPaste,
+		...columns,
+		table,
+		tableHeader,
+		tableRow,
+		tableCell,
+		Superscript,
+		Subscript,
+		Indent,
+		Color,
+		TextStyle,
+		UploadSkeleton,
+		Iframe,
+		Embed,
+		Placeholder.configure({ placeholder })
+	];
+
+	return [
+		...baseExtensions.filter((extension) => {
+			const name = extension?.name;
+			return typeof name !== 'string' || !pluginNames.has(name);
+		}),
+		...plugins
+	];
+};
 
 export default (
 	element: Element,
